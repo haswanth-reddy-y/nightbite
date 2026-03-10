@@ -18,12 +18,13 @@
         
         .hidden { display: none !important; }
         .logout-btn { background: #e53e3e !important; width: auto !important; padding: 5px 15px !important; font-size: 0.8rem; margin-left: 10px; }
-        .view-btn { background: var(--secondary, #2b6cb0) !important; margin-left: 10px; padding: 5px 15px !important; font-size: 0.8rem; }
+        .view-btn { background: #2b6cb0 !important; margin-left: 10px; padding: 5px 15px !important; font-size: 0.8rem; }
  
         .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }
         .glass-card { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); width: 380px; text-align: center; }
         input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; outline: none; }
-         
+        
+       
         button { padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--primary), #38a169); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; }
         .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 30px 5%; }
@@ -32,8 +33,9 @@
         .price-tag { color: var(--accent); font-weight: bold; font-size: 1.3rem; margin: 10px 0; }
         
         .admin-banner { background: var(--accent); color: var(--dark); text-align: center; padding: 5px; font-weight: bold; font-size: 0.8rem; }
-
         .order-notification { background: #2d3748; padding: 15px; border-radius: 15px; margin-top: 10px; border-left: 5px solid var(--accent); }
+        
+        .parcel-setting-box { border: 2px dashed var(--accent); padding: 15px; border-radius: 15px; margin-bottom: 20px; text-align: center; }
     </style>
 </head>
 <body>
@@ -84,13 +86,22 @@
                     <button class="logout-btn" onclick="logout()">Logout</button>
                 </div>
             </div>
+
+            <div class="parcel-setting-box">
+                <h4 style="margin:0 0 10px 0; color:var(--accent);">Global Parcel Settings</h4>
+                <div style="display:flex; gap:10px; align-items:center; justify-content:center;">
+                    <span>Extra Charge: ₹</span>
+                    <input type="number" id="global-parcel-input" style="width:80px; margin:0;" value="15">
+                    <button onclick="updateGlobalParcel()" style="padding:8px 15px; font-size:0.7rem;">Update All Items</button>
+                </div>
+                <small style="color:#aaa;">* This amount applies to all items in the menu.</small>
+            </div>
             
-            <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748; margin-top: 20px;">
+            <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748;">
                 <h3>Add Food Item</h3>
                 <input type="text" id="new-item-name" placeholder="Food Name">
-                <input type="number" id="new-item-price" placeholder="Price (₹)">
+                <input type="number" id="new-item-price" placeholder="Base Price (₹)">
                 <input type="file" id="new-item-img" accept="image/*">
-                <label><input type="checkbox" id="parcel-toggle" checked> Apply Parcel Charge (₹15)</label>
                 <button onclick="addItem()" style="margin-top:10px;">Post Item</button>
             </div>
 
@@ -100,19 +111,32 @@
     </div>
 
     <script>
-        const DEFAULT_PARCEL_CHARGE = 15;
+ 
+        let currentParcelCharge = parseInt(localStorage.getItem('globalParcelCharge')) || 15;
+        
         let menuItems = JSON.parse(localStorage.getItem('savedMenu')) || [
-            { id: 1, name: "Chicken Biryani", price: 220, img: "https://images.unsplash.com/photo-1630409351241-e90e76d94132?w=400", parcel: true },
-            { id: 2, name: "Egg Fried Rice", price: 150, img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400", parcel: true }
+            { id: 1, name: "Chicken Biryani", price: 220, img: "https://images.unsplash.com/photo-1630409351241-e90e76d94132?w=400" },
+            { id: 2, name: "Egg Fried Rice", price: 150, img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400" }
         ];
+        
         let currentCart = [];
         let isAdminPreview = false;
 
         window.onload = () => {
             const savedRole = localStorage.getItem('userRole');
+            document.getElementById('global-parcel-input').value = currentParcelCharge;
             if (savedRole) enterApp(savedRole);
             renderAdminOrders();
         };
+ 
+        function updateGlobalParcel() {
+            const newVal = parseInt(document.getElementById('global-parcel-input').value);
+            if (isNaN(newVal)) return alert("Enter a valid number");
+            currentParcelCharge = newVal;
+            localStorage.setItem('globalParcelCharge', newVal);
+            alert("Parcel charges updated to ₹" + newVal + " for all items!");
+            if(isAdminPreview) renderMenu();  
+        }
 
         function handleLogin(role) {
             if (role === 'admin') {
@@ -136,7 +160,6 @@
             if (role === 'user') renderMenu();
         }
 
-     
         function toggleAdminView() {
             const userDash = document.getElementById('user-dashboard');
             const adminDash = document.getElementById('admin-dashboard');
@@ -144,15 +167,13 @@
             const logoutBtn = document.getElementById('logout-trigger');
 
             if (!isAdminPreview) {
-                 
                 adminDash.classList.add('hidden');
                 userDash.classList.remove('hidden');
                 previewBar.classList.remove('hidden');
-                logoutBtn.classList.add('hidden');  
+                logoutBtn.classList.add('hidden');
                 renderMenu();
                 isAdminPreview = true;
             } else {
-            
                 userDash.classList.add('hidden');
                 adminDash.classList.remove('hidden');
                 previewBar.classList.add('hidden');
@@ -168,8 +189,8 @@
                 <div class="food-card">
                     <img src="${item.img}" alt="${item.name}">
                     <h3>${item.name}</h3>
-                    <div class="price-tag">₹${item.price} ${item.parcel ? `<span style="font-size:0.8rem; color:gray;">+₹${DEFAULT_PARCEL_CHARGE} Parcel</span>` : ''}</div>
-                    <button onclick="${isAdminPreview ? "alert('Preview Mode: Actions Disabled')" : `addToCart(${item.id})`}">Add to Cart</button>
+                    <div class="price-tag">₹${item.price} <span style="font-size:0.8rem; color:gray;">+₹${currentParcelCharge} Parcel</span></div>
+                    <button onclick="${isAdminPreview ? "alert('Preview Mode')" : `addToCart(${item.id})`}">Add to Cart</button>
                 </div>
             `).join('');
         }
@@ -181,13 +202,13 @@
         }
 
         function checkout() {
-            if(isAdminPreview) return alert("Preview Mode: You cannot place orders.");
+            if(isAdminPreview) return alert("Preview Mode");
             if(currentCart.length === 0) return alert("Cart empty");
             const orderData = {
                 user: localStorage.getItem('userName'),
                 phone: localStorage.getItem('userPhone'),
                 items: currentCart,
-                total: currentCart.reduce((sum, item) => sum + item.price + (item.parcel ? DEFAULT_PARCEL_CHARGE : 0), 0)
+                total: currentCart.reduce((sum, item) => sum + item.price + currentParcelCharge, 0)
             };
             let orders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
             orders.push(orderData);
@@ -199,13 +220,12 @@
         function addItem() {
             const name = document.getElementById('new-item-name').value;
             const price = parseInt(document.getElementById('new-item-price').value);
-            const parcel = document.getElementById('parcel-toggle').checked;
             const imgInput = document.getElementById('new-item-img');
 
             if (name && price && imgInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    menuItems.push({ id: Date.now(), name, price, img: e.target.result, parcel });
+                    menuItems.push({ id: Date.now(), name, price, img: e.target.result });
                     localStorage.setItem('savedMenu', JSON.stringify(menuItems));
                     alert("Food Posted!");
                     location.reload();
@@ -221,7 +241,7 @@
             container.innerHTML = orders.map((order, index) => `
                 <div class="order-notification">
                     <p><strong>Customer:</strong> ${order.user} (${order.phone})</p>
-                    <p><strong>Total:</strong> ₹${order.total}</p>
+                    <p><strong>Total (inc. ₹${currentParcelCharge} fee/item):</strong> ₹${order.total}</p>
                     <button onclick="acceptOrder(${index})">✅ Accept & Bill</button>
                 </div>
             `).join('');
@@ -230,7 +250,7 @@
         function acceptOrder(index) {
             const orders = JSON.parse(localStorage.getItem('pendingOrders'));
             const order = orders[index];
-            const billText = `BILL: ${order.user}%0AItems: ${order.items.map(i => i.name).join(', ')}%0ATotal: ₹${order.total}`;
+            const billText = `THE NIGHT HUNGER BILL%0A-----------------%0AUser: ${order.user}%0AItems: ${order.items.map(i => i.name).join(', ')}%0AParcel Fee: ₹${currentParcelCharge} per item%0ATotal: ₹${order.total}`;
             window.open(`https://wa.me/91${order.phone}?text=${billText}`, '_blank');
             orders.splice(index, 1);
             localStorage.setItem('pendingOrders', JSON.stringify(orders));
