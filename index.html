@@ -69,7 +69,7 @@
 
             <div id="adminFields" class="hidden">
                 <h3 class="text-2xl font-bold mb-6 text-blue-900 text-center">Admin Access</h3>
-                <input type="text" id="aID" placeholder="havi" class="w-full p-3 mb-3 border rounded-xl">
+                <input type="text" id="aID" placeholder="Admin ID" class="w-full p-3 mb-3 border rounded-xl">
                 <input type="password" id="aPass" placeholder="Password" class="w-full p-3 mb-6 border rounded-xl">
                 <button onclick="verifyAdmin()" class="w-full bg-blue-900 text-white py-3 rounded-xl font-bold">Login</button>
             </div>
@@ -109,160 +109,175 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
- 
-         const firebaseConfig = {
-  apiKey: "AIzaSyBV2EnvHVHMhH09Tl_pdoLL9rsyr78FWoc",
-  authDomain: "nightbite-e11ae.firebaseapp.com",
-  databaseURL: "https://nightbite-e11ae-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "nightbite-e11ae",
-  storageBucket: "nightbite-e11ae.firebasestorage.app",
-  messagingSenderId: "76062594463",
-  appId: "1:76062594463:web:927e606ca31809abd959aa",
-  measurementId: "G-BCPFL8L53M"
-};
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
- 
-        let cart = [];
-        let parcelPrice = 0;
-        let user = JSON.parse(localStorage.getItem('campusUser')) || null;
+    const firebaseConfig = {
+        apiKey: "AIzaSyBV2EnvHVHMhH09Tl_pdoLL9rsyr78FWoc",
+        authDomain: "nightbite-e11ae.firebaseapp.com",
+        databaseURL: "https://nightbite-e11ae-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "nightbite-e11ae",
+        storageBucket: "nightbite-e11ae.firebasestorage.app",
+        messagingSenderId: "76062594463",
+        appId: "1:76062594463:web:927e606ca31809abd959aa",
+        measurementId: "G-BCPFL8L53M"
+    };
 
-        if(user) document.getElementById('userStatus').innerText = `Hi, ${user.name}`;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    
-        onSnapshot(doc(db, "settings", "global"), (snap) => {
-            if(snap.exists()) {
-                parcelPrice = snap.data().parcel || 0;
-                document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
-                updateTotals();
-            }
-        });
+    let cart = [];
+    let parcelPrice = 0;
+    let user = JSON.parse(localStorage.getItem('campusUser')) || null;
 
-        onSnapshot(collection(db, "menu"), (snap) => {
-            const grid = document.getElementById('menuGrid');
-            grid.innerHTML = '';
-            snap.forEach(d => {
-                const item = d.data();
-                grid.innerHTML += `
-                    <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-100 p-2">
-                        <img src="${item.image}" class="h-48 w-full object-cover rounded-2xl mb-4">
-                        <div class="px-3 pb-3">
-                            <h3 class="font-black text-slate-800 text-lg">${item.name}</h3>
-                            <div class="flex justify-between items-center mt-2">
-                                <span class="text-2xl font-bold text-orange-600">₹${item.price}</span>
-                                <button onclick="addToCart('${item.name}', ${item.price})" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold active:scale-95 transition">Add</button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        });
+    if(user) document.getElementById('userStatus').innerText = `Hi, ${user.name}`;
 
-        onSnapshot(collection(db, "orders"), (snap) => {
-            const list = document.getElementById('orderList');
-            list.innerHTML = '';
-            snap.forEach(d => {
-                const o = d.data();
-                if(o.status === "pending") {
-                    list.innerHTML += `
-                        <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-orange-500 flex justify-between items-center">
-                            <div>
-                                <h4 class="font-black text-xl">${o.userName} <span class="text-sm font-normal text-slate-400">| ${o.phone}</span></h4>
-                                <p class="text-slate-600 mt-1">${o.foodItems.join(', ')}</p>
-                                <span class="text-orange-600 font-bold text-lg">Bill: ₹${o.bill}</span>
-                            </div>
-                            <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-500 text-white px-6 py-2 rounded-lg font-bold">ACCEPT</button>
-                        </div>`;
-                }
-            });
-        });
-
-        
-        window.openModal = (type) => {
-            document.getElementById('masterModal').classList.add('modal-active');
-            document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
-            document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
-        }
-        window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
-        
-        window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
-
-      
-        window.addToCart = (name, price) => {
-            cart.push({ name, price });
-            renderCart();
-        }
-
-        function renderCart() {
-            const list = document.getElementById('cartList');
-            list.innerHTML = cart.map((item, i) => `
-                <div class="flex justify-between items-center border-b pb-2">
-                    <span class="font-bold">${item.name}</span>
-                    <button onclick="cart.splice(${i},1); renderCart()" class="text-red-500 font-bold">Remove</button>
-                </div>`).join('');
-            document.getElementById('cartCount').innerText = cart.length;
+    // Listeners
+    onSnapshot(doc(db, "settings", "global"), (snap) => {
+        if(snap.exists()) {
+            parcelPrice = snap.data().parcel || 0;
+            document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
             updateTotals();
         }
+    });
 
-        function updateTotals() {
-            const foodTotal = cart.reduce((s, i) => s + i.price, 0);
-            const total = foodTotal + (cart.length * parcelPrice);
-            document.getElementById('totalDisplay').innerText = `₹${total}`;
-        }
+    onSnapshot(collection(db, "menu"), (snap) => {
+        const grid = document.getElementById('menuGrid');
+        grid.innerHTML = '';
+        snap.forEach(d => {
+            const item = d.data();
+            grid.innerHTML += `
+                <div class="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-2xl transition-all border border-slate-100 p-2">
+                    <img src="${item.image}" class="h-48 w-full object-cover rounded-2xl mb-4">
+                    <div class="px-3 pb-3">
+                        <h3 class="font-black text-slate-800 text-lg">${item.name}</h3>
+                        <div class="flex justify-between items-center mt-2">
+                            <span class="text-2xl font-bold text-orange-600">₹${item.price}</span>
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-bold active:scale-95 transition">Add</button>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    });
 
-        window.registerUser = async () => {
-            const name = document.getElementById('uName').value;
-            const phone = document.getElementById('uPhone').value;
-            const pass = document.getElementById('uPass').value;
-            user = { name, phone };
-            await addDoc(collection(db, "users"), { ...user, pass });
-            localStorage.setItem('campusUser', JSON.stringify(user));
-            location.reload();
-        }
+    onSnapshot(collection(db, "orders"), (snap) => {
+        const list = document.getElementById('orderList');
+        list.innerHTML = '';
+        snap.forEach(d => {
+            const o = d.data();
+            if(o.status === "pending") {
+                list.innerHTML += `
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border-l-8 border-orange-500 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-black text-xl">${o.userName} <span class="text-sm font-normal text-slate-400">| ${o.phone}</span></h4>
+                            <p class="text-slate-600 mt-1">${o.foodItems.join(', ')}</p>
+                            <span class="text-orange-600 font-bold text-lg">Bill: ₹${o.bill}</span>
+                        </div>
+                        <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-500 text-white px-6 py-2 rounded-lg font-bold">ACCEPT</button>
+                    </div>`;
+            }
+        });
+    });
 
-        window.placeOrder = async () => {
-            if(!user) return openModal('user');
-            if(cart.length === 0) return alert("Cart empty");
-            
-            const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
-            await addDoc(collection(db, "orders"), {
-                userName: user.name,
-                phone: user.phone,
-                foodItems: cart.map(i => i.name),
-                bill: finalBill,
-                status: "pending"
-            });
-            alert("Order sent to kitchen!");
-            cart = []; renderCart(); toggleCart();
-        }
- 
-        window.verifyAdmin = () => {
-            if(document.getElementById('aID').value === "ADMIN_ID" && document.getElementById('aPass').value === "ADMIN_PASS") {
-                document.getElementById('adminDash').classList.remove('hidden');
-                closeModal();
-            } else alert("Wrong Login");
-        }
+    // Modal & Cart UI Functions
+    window.openModal = (type) => {
+        document.getElementById('masterModal').classList.add('modal-active');
+        document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
+        document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
+    }
+    window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
+    window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
 
-        window.dbAddMenuItem = async () => {
-            const name = document.getElementById('mName').value;
-            const price = Number(document.getElementById('mPrice').value);
-            const image = document.getElementById('mImg').value;
-            await addDoc(collection(db, "menu"), { name, price, image });
-            alert("Menu Updated!");
-        }
+    // Cart Logic
+    window.addToCart = (name, price) => {
+        cart.push({ name, price });
+        renderCart();
+    }
 
-        window.dbSetParcel = async () => {
-            const p = Number(document.getElementById('pInput').value);
-            await setDoc(doc(db, "settings", "global"), { parcel: p });
-            alert("Charges updated globally!");
-        }
+    window.renderCart = () => {
+        const list = document.getElementById('cartList');
+        list.innerHTML = cart.map((item, i) => `
+            <div class="flex justify-between items-center border-b pb-2">
+                <span class="font-bold">${item.name}</span>
+                <button onclick="removeFromCart(${i})" class="text-red-500 font-bold">Remove</button>
+            </div>`).join('');
+        document.getElementById('cartCount').innerText = cart.length;
+        updateTotals();
+    }
 
-        window.confirmOrder = async (id, phone, bill) => {
-            await updateDoc(doc(db, "orders", id), { status: "accepted" });
-            alert(`SMS SENT TO ${phone}: Your bill is ₹${bill}. Please pay at counter.`);
+    window.removeFromCart = (i) => {
+        cart.splice(i, 1);
+        renderCart();
+    }
+
+    window.updateTotals = () => {
+        const foodTotal = cart.reduce((s, i) => s + i.price, 0);
+        const total = foodTotal + (cart.length * parcelPrice);
+        document.getElementById('totalDisplay').innerText = `₹${total}`;
+    }
+
+    // User Functions
+    window.registerUser = async () => {
+        const name = document.getElementById('uName').value;
+        const phone = document.getElementById('uPhone').value;
+        const pass = document.getElementById('uPass').value;
+        if(!name || !phone) return alert("Enter details");
+        user = { name, phone };
+        await addDoc(collection(db, "users"), { ...user, pass });
+        localStorage.setItem('campusUser', JSON.stringify(user));
+        location.reload();
+    }
+
+    window.placeOrder = async () => {
+        if(!user) return openModal('user');
+        if(cart.length === 0) return alert("Cart empty");
+        
+        const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
+        await addDoc(collection(db, "orders"), {
+            userName: user.name,
+            phone: user.phone,
+            foodItems: cart.map(i => i.name),
+            bill: finalBill,
+            status: "pending",
+            createdAt: new Date()
+        });
+        alert("Order sent to kitchen!");
+        cart = []; renderCart(); toggleCart();
+    }
+
+    // Admin Functions
+    window.verifyAdmin = () => {
+        const id = document.getElementById('aID').value;
+        const pass = document.getElementById('aPass').value;
+        
+        // Updated Credentials
+        if(id === "havi" && pass === "1234567890") {
+            document.getElementById('adminDash').classList.remove('hidden');
+            closeModal();
+        } else {
+            alert("Incorrect Admin ID or Password");
         }
-    </script>
+    }
+
+    window.dbAddMenuItem = async () => {
+        const name = document.getElementById('mName').value;
+        const price = Number(document.getElementById('mPrice').value);
+        const image = document.getElementById('mImg').value;
+        if(!name || !price) return alert("Enter item details");
+        await addDoc(collection(db, "menu"), { name, price, image });
+        alert("Menu Updated!");
+    }
+
+    window.dbSetParcel = async () => {
+        const p = Number(document.getElementById('pInput').value);
+        await setDoc(doc(db, "settings", "global"), { parcel: p });
+        alert("Parcel charges updated!");
+    }
+
+    window.confirmOrder = async (id, phone, bill) => {
+        await updateDoc(doc(db, "orders", id), { status: "accepted" });
+        alert(`ORDER ACCEPTED\nBill of ₹${bill} confirmed for ${phone}`);
+    }
+</script>
 </body>
 </html>
