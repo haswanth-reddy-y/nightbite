@@ -13,92 +13,45 @@
             --accent-light: #feebc8;  
             --dark: #1a202c;
             --glass: rgba(255, 255, 255, 0.1);
+            
+            --parcel-fee: " + ₹15"; 
         }
 
+        
         * { box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background: var(--dark); color: white; margin: 0; overflow-x: hidden; }
-        
         h1, h2, h3, h4, .logo { font-family: 'Metamorphous', serif; color: var(--accent-light); }
- 
-        .auth-container {
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; 
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://stock.adobe.com/images/food-cooking-background-ingredients-for-preparation-vegan-dishes-vegetables-roots-spices-mushrooms-and-herbs-big-kitchen-chef-knife-healthy-food-concept/249249058');
-            background-size: cover; background-position: center;
-        }
-        .glass-card {
-            background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px);
-            padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1);
-            width: 380px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-        }
-        input, select {
-            width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; outline: none;
-        }
-        select option { background: #333; }
-
-        button {
-            width: 100%; padding: 12px; border-radius: 12px; border: none;
-            background: linear-gradient(135deg, var(--primary), #38a169);
-            color: white; font-weight: bold; cursor: pointer; transition: 0.3s;
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-        button:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(56, 161, 105, 0.4); }
- 
-        .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100;
-        }
-        .logo { font-weight: 800; font-size: 1.8rem; letter-spacing: -1px; margin: 0; }
+        .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1543353071-10c8ba85a904?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }
+        .glass-card { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(15px); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); width: 380px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; outline: none; }
+        button { width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--primary), #38a169); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; }
         .logo span { color: var(--accent); }
-        
         .nav-cats { display: flex; gap: 15px; overflow-x: auto; padding: 20px 5%; background: #2d3748; }
         .cat-btn { background: var(--glass); padding: 10px 25px; border-radius: 25px; font-size: 0.9rem; width: auto; border: 1px solid rgba(255,255,255,0.1); color: white;}
-        .cat-btn.active { background: var(--accent); color: #1a202c; border: none; font-weight: bold; }
-
-        .food-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 25px; padding: 30px 5%;
-        }
-        .food-card {
-            background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 15px;
-            transition: 0.3s; border: 1px solid rgba(255,255,255,0.05); overflow: hidden;
-        }
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 30px 5%; }
+        .food-card { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .food-card img { width: 100%; border-radius: 15px; height: 180px; object-fit: cover; }
-        .food-card h3 { margin: 15px 0 5px; color: white; font-family: 'Poppins', sans-serif;}
-        .food-card p.description { font-size: 0.85rem; color: #a0aec0; margin: 0 0 10px; }
-        .price-tag { color: var(--accent); font-weight: bold; font-size: 1.3rem; margin: 10px 0; display: flex; align-items: center; justify-content: space-between; }
- 
-        #admin-dashboard { padding: 30px 5%; background: #1a202c;}
-        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 15px; margin-bottom: 30px;}
-        .admin-header h1 { margin: 0; color: var(--accent-light); }
-        
-        .order-row {
-            background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px;
-            margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
-            border-left: 4px solid var(--primary);
-        }
-        .special-badge { background: var(--accent); color: #1a202c; padding: 3px 10px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; }
-
+        .price-tag { color: var(--accent); font-weight: bold; font-size: 1.3rem; margin: 10px 0; display: flex; flex-direction: column; align-items: flex-start; }
+        .special-badge { background: var(--accent); color: #1a202c; padding: 3px 10px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; margin-top: 5px; }
         .hidden { display: none !important; }
+        .parcel-info { font-size: 0.7rem; color: #a0aec0; font-weight: normal; }
     </style>
 </head>
 <body>
- 
-    
- 
+
     <div id="login-layer" class="auth-container">
         <div class="glass-card" id="user-login-box">
-            <h1 class="logo" style="font-size: 2rem; margin-bottom: 10px;">THE NIGHT<span>BITES</span></h1>
+            <h1 class="logo">THE NIGHT<span>HUNGER</span></h1>
             <h2>Namaskaram!</h2>
-            <input type="text" id="u-name" placeholder="user Name">
+            <input type="text" id="u-name" placeholder="User Name">
             <input type="tel" id="u-phone" placeholder="Phone Number">
             <button onclick="mockSendOTP()">Request OTP</button>
             <div id="otp-area" class="hidden">
-                <input type="text" id="u-otp" placeholder="Enter OTP (4 Digits)">
+                <input type="text" id="u-otp" placeholder="Enter OTP (1234)">
                 <button onclick="enterApp('user')">Verify & Enter</button>
             </div>
-            <p style="font-size: 0.85rem; margin-top: 25px; cursor: pointer; color: var(--accent-light);" onclick="switchLogin('admin')">Admin Login</p>
+            <p onclick="switchLogin('admin')" style="cursor:pointer; font-size:0.8rem; margin-top:20px;">Admin Login</p>
         </div>
 
         <div class="glass-card hidden" id="admin-login-box">
@@ -106,154 +59,112 @@
             <input type="text" id="a-id" placeholder="Admin ID">
             <input type="password" id="a-pass" placeholder="Password">
             <button onclick="enterApp('admin')">Login as Admin</button>
-            <p style="font-size: 0.85rem; margin-top: 25px; cursor: pointer; color: var(--accent);" onclick="switchLogin('user')">Go back to user Hub</p>
+            <p onclick="switchLogin('user')" style="cursor:pointer; font-size:0.8rem; margin-top:20px;">Back to Menu</p>
         </div>
     </div>
 
     <div id="user-dashboard" class="hidden">
         <nav class="navbar">
-            <div class="logo">THE NIGHT<span>BITES</span></div>
-            <input type="text" id="search" placeholder="Search for Dosa, Biryani..." style="width: 30%; margin: 0; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">
-            <button class="cat-btn" style="background: var(--primary); border: none;">🛒 My Basket (0)</button>
+            <div class="logo">THE NIGHT<span>HUNGER</span></div>
+            <input type="text" id="search" placeholder="Search food..." style="width: 30%; margin: 0;">
+            <button class="cat-btn" style="background: var(--primary);">🛒 Basket (0)</button>
         </nav>
         
-        <div class="nav-cats">
-            <button class="cat-btn active">Best Sellers</button>
-            <button class="cat-btn">Biryanis</button>
-            <button class="cat-btn">fried rice</button>
-            <button class="cat-btn">couple pack</button>
-            <button class="cat-btn">family pack</button>
-            <button class="cat-btn">Snacks & Drinks</button>
-        </div>
+        <div class="nav-cats" id="category-bar">
+            </div>
 
         <div class="food-grid" id="menu-items">
-            <div class="food-card">
-                <img src="https://images.unsplash.com/photo-1668236543090-82eba5ee5976?q=80&w=400&auto=format&fit=crop" alt="Masala Dosa">
-                <h3>Golden Masala Dosa</h3>
-                <p class="description">Crispy crepe filled with spiced potato masala, served with sambar.</p>
-                <div class="price-tag">₹110 <span class="special-badge">Parcel: ₹125</span></div>
-                <button>Add</button>
             </div>
-            <div class="food-card">
-                <img src="https://images.unsplash.com/photo-1630409351241-e90e76d94132?q=80&w=400&auto=format&fit=crop" alt="Hyderabadi Biryani">
-                <h3>Chicken Biryani (Hyd)</h3>
-                <p class="description">Authentic dum biryani, flavorful spices, and saffron.</p>
-                <div class="price-tag">₹220 <span class="special-badge">Parcel: ₹235</span></div>
-                <button>Add</button>
-            </div>
-            <div class="food-card">
-                <img src="https://images.unsplash.com/photo-1589302168068-964664d93dc0?q=80&w=400&auto=format&fit=crop" alt="Idli Sambar">
-                <h3>Idli Sambar Plate (3 Pcs)</h3>
-                <p class="description">Soft steamed rice cakes served with hot lentil sambar and chutneys.</p>
-                <div class="price-tag">₹80 <span class="special-badge">Parcel: ₹90</span></div>
-                <button>Add</button>
-            </div>
-        </div>
     </div>
 
     <div id="admin-dashboard" class="hidden">
-        <div class="admin-header">
+        <div style="padding: 20px 5%;">
             <h1>Admin Dashboard</h1>
-            <button style="width: auto; padding: 8px 20px; background: #e53e3e;" onclick="window.location.reload();">Log Out</button>
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-            <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748;">
-                <h3>Upload New Item</h3>
-                <input type="text" id="new-item-name" placeholder="Item Name (e.g., Veg Meals)">
+            <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748; margin-bottom: 20px;">
+                <h3>Add New Item</h3>
+                <input type="text" id="new-item-name" placeholder="Item Name">
                 <select id="new-item-cat">
-                   <option>fried rice</option>
                     <option>Biryanis</option>
-                    <option>couple pack</option>
-                    <option>family pack</option>
+                    <option>Fried Rice</option>
                     <option>Snacks & Drinks</option>
                 </select>
                 <input type="number" id="new-item-price" placeholder="Base Price (₹)">
-                <input type="number" id="new-item-parcel" placeholder="Parcel Special Price (₹)">
-                <label style="font-size: 0.8rem; display: block; margin: 15px 0 5px; color: #a0aec0;">Photo Upload (Placeholder for backend storage)</label>
-                <input type="file" id="new-item-img">
-                <button onclick="addItem()" style="margin-top: 15px;">Add to Menu</button>
-            </div>
-
-            <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748;">
-                <h3>Recent Orders (Real-time)</h3>
-                <div id="order-log">
-                    <div class="order-row">
-                        <div>
-                            <strong>Haswanth Reddy</strong><br>
-                            <small>1x Golden Dosa, 1x Sprite</small>
-                        </div>
-                        <button onclick="confirmOrder('Haswanth', '9393969353')" style="width: auto; padding: 5px 15px; background: var(--accent); color: #1a202c; font-weight: bold;">Confirm Order</button>
-                    </div>
-                </div>
+                <p style="font-size: 0.8rem; color: var(--accent);">* Default Parcel Charge (₹15) will be added automatically.</p>
+                <button onclick="addItem()">Add to Menu</button>
             </div>
         </div>
     </div>
-  <script src="app.js"></script>
+
     <script>
-      
+         
+        const DEFAULT_PARCEL_CHARGE = 15;  
+
+         
+        const menuItems = [
+            { name: "Chicken Biryani", price: 220, cat: "Biryanis", img: "https://images.unsplash.com/photo-1630409351241-e90e76d94132?w=400" },
+            { name: "Egg Fried Rice", price: 150, cat: "Fried Rice", img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400" }
+        ];
+
+        function renderMenu() {
+            const grid = document.getElementById('menu-items');
+            grid.innerHTML = menuItems.map(item => `
+                <div class="food-card">
+                    <img src="${item.img}" alt="${item.name}">
+                    <h3>${item.name}</h3>
+                    <div class="price-tag">
+                        ₹${item.price} 
+                        <span class="parcel-info">+ ₹${DEFAULT_PARCEL_CHARGE} Parcel Fee</span>
+                        <span class="special-badge">Total Parcel: ₹${item.price + DEFAULT_PARCEL_CHARGE}</span>
+                    </div>
+                    <button>Add to Cart</button>
+                </div>
+            `).join('');
+        }
+
+        
         function switchLogin(type) {
             document.getElementById('user-login-box').classList.toggle('hidden', type === 'admin');
             document.getElementById('admin-login-box').classList.toggle('hidden', type === 'user');
         }
 
         function mockSendOTP() {
-            const name = document.getElementById('u-name').value;
-            const phone = document.getElementById('u-phone').value;
-            if(name && phone) {
-                document.getElementById('otp-area').classList.remove('hidden');
-                alert("Vanakkam! Mock OTP 1234 sent to " + phone);
-            } else {
-                alert("Please enter Name and Phone Number");
-            }
+            document.getElementById('otp-area').classList.remove('hidden');
+            alert("Mock OTP: 1234");
         }
 
         function enterApp(role) {
-            if (role === 'user') {
-                const otp = document.getElementById('u-otp').value;
-                if(otp === "1234") {  
-                    document.getElementById('login-layer').classList.add('hidden');
-                    document.getElementById('user-dashboard').classList.remove('hidden');
-                } else { alert("Invalid OTP"); }
+            if (role === 'admin') {
+                const id = document.getElementById('a-id').value;
+                const pass = document.getElementById('a-pass').value;
+                if(id === "havi-reddy" && pass === "123456789") {
+                    showDashboard('admin');
+                } else { alert("Wrong Admin Credentials"); }
             } else {
-   
-                const adminID = document.getElementById('a-id').value;
-                const adminPass = document.getElementById('a-pass').value;
-
-                if (adminID === "havi-reddy" && adminPass === "123456789") {
-                    document.getElementById('login-layer').classList.add('hidden');
-                    document.getElementById('admin-dashboard').classList.remove('hidden');
-                } else {
-                    alert("Invalid Credentials!");
-                }
+                showDashboard('user');
+                renderMenu();
             }
         }
- 
+
+        function showDashboard(role) {
+            document.getElementById('login-layer').classList.add('hidden');
+            document.getElementById(role + '-dashboard').classList.remove('hidden');
+        }
+
+        function confirmOrder(userName, phone) {
+             
+            const message = `Vanakkam ${userName}! Your order has been confirmed. Total includes a ₹${DEFAULT_PARCEL_CHARGE} parcel charge per item. Enjoy!`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
         function addItem() {
             const name = document.getElementById('new-item-name').value;
-            if(!name) return alert("Please enter item details");
-            alert(name + " has been added to the menu. The user view will update instantly (requires backend connection).");
-        }
- 
-        function confirmOrder(userName, phone) {
-            const message = `Vanakkam ${userName}! Your CampusBites order has been confirmed. It will be ready shortly. Enjoy your meal!`;
-         
-            const choice = confirm(`Confirm order for ${userName}?\n\nClick OK to send notification via WhatsApp.`);
-
-            if (choice) {
-                
-                const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-                window.open(whatsappUrl, '_blank');
-            } else {
-                
-                const smsUrl = `sms:${phone}?body=${encodeURIComponent(message)}`;
-                window.location.href = smsUrl;
+            const price = parseInt(document.getElementById('new-item-price').value);
+            if(name && price) {
+                const parcelTotal = price + DEFAULT_PARCEL_CHARGE;
+                alert(`${name} added! \nBase: ₹${price} \nParcel Total: ₹${parcelTotal}`);
             }
-            
-             
-            alert(`Notification triggered for ${userName}.`);
         }
     </script>
-
 </body>
 </html>
