@@ -8,10 +8,7 @@
     
     <style>
         :root {
-            --primary: #22543d;  
-            --accent: #f6ad55;  
-            --accent-light: #feebc8;  
-            --dark: #1a202c;
+            --primary: #22543d; --accent: #f6ad55; --accent-light: #feebc8; --dark: #1a202c;
             --glass: rgba(255, 255, 255, 0.1);
         }
 
@@ -19,176 +16,233 @@
         body { background: var(--dark); color: white; margin: 0; overflow-x: hidden; }
         h1, h2, h3, h4, .logo { font-family: 'Metamorphous', serif; color: var(--accent-light); }
         
-        /* Layout */
         .hidden { display: none !important; }
+        .logout-btn { background: #e53e3e !important; width: auto !important; padding: 5px 15px !important; font-size: 0.8rem; margin-left: 10px; }
+        .view-btn { background: var(--secondary, #2b6cb0) !important; margin-left: 10px; padding: 5px 15px !important; font-size: 0.8rem; }
+ 
+        .auth-container { display: flex; justify-content: center; align-items: center; height: 100vh; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1543353071-10c8ba85a904?auto=format&fit=crop&w=1350&q=80'); background-size: cover; background-position: center; }
+        .glass-card { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(15px); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); width: 380px; text-align: center; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; outline: none; }
+         
+        button { padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--primary), #38a169); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
         .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 5%; background: rgba(15, 23, 42, 0.9); position: sticky; top: 0; z-index: 100; }
-        .logo span { color: var(--accent); }
-        
-        /* Category Bar */
-        .nav-cats { display: flex; gap: 15px; overflow-x: auto; padding: 15px 5%; background: #2d3748; scrollbar-width: none; }
-        .cat-btn { background: var(--glass); padding: 8px 20px; border-radius: 20px; font-size: 0.8rem; width: auto; border: 1px solid rgba(255,255,255,0.1); color: white; cursor: pointer; white-space: nowrap; }
-        
-        /* Food Grid */
         .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 30px 5%; }
-        .food-card { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); text-align: center; }
+        .food-card { background: rgba(255, 255, 255, 0.05); border-radius: 20px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); }
         .food-card img { width: 100%; border-radius: 15px; height: 180px; object-fit: cover; }
-        .price-tag { color: var(--accent); font-weight: bold; font-size: 1.2rem; margin: 10px 0; display: block; }
-        .parcel-info { font-size: 0.7rem; color: #a0aec0; display: block; margin-bottom: 5px;}
-
-        /* Buttons */
-        button { padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--primary), #38a169); color: white; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { transform: scale(1.02); }
-        .admin-trigger { background: transparent; border: 1px solid var(--accent); color: var(--accent); font-size: 0.7rem; padding: 5px 10px; }
-        .checkout-btn { background: var(--accent); color: var(--dark); width: 100%; margin-top: 20px; font-size: 1.1rem; }
-
-        /* Modals (Checkout & Admin Login) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .glass-card { background: rgba(25, 30, 45, 0.9); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); width: 380px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; outline: none; }
+        .price-tag { color: var(--accent); font-weight: bold; font-size: 1.3rem; margin: 10px 0; }
         
-        .cart-counter { background: var(--accent); color: var(--dark); padding: 2px 8px; border-radius: 50%; font-size: 0.8rem; margin-left: 5px; }
+        .admin-banner { background: var(--accent); color: var(--dark); text-align: center; padding: 5px; font-weight: bold; font-size: 0.8rem; }
+
+        .order-notification { background: #2d3748; padding: 15px; border-radius: 15px; margin-top: 10px; border-left: 5px solid var(--accent); }
     </style>
 </head>
 <body>
 
-    <div id="user-app">
-        <nav class="navbar">
+    <div id="admin-preview-bar" class="admin-banner hidden">
+        EYES ONLY: Admin Preview Mode — <button onclick="toggleAdminView()" style="background:none; color:black; text-decoration:underline; padding:0; box-shadow:none; font-size:0.8rem;">Return to Panel</button>
+    </div>
+
+    <div id="login-layer" class="auth-container">
+        <div class="glass-card" id="user-login-box">
             <h1 class="logo">THE NIGHT<span>HUNGER</span></h1>
-            <div style="display:flex; align-items:center; gap:15px;">
-                <button class="admin-trigger" onclick="openAdminModal()">Admin Login</button>
-                <button onclick="openCheckoutModal()">🛒 Cart <span id="cart-count" class="cart-counter">0</span></button>
+            <input type="text" id="u-name" placeholder="Full Name">
+            <input type="tel" id="u-phone" placeholder="Phone Number">
+            <button onclick="mockSendOTP()">Request OTP</button>
+            <div id="otp-area" class="hidden">
+                <input type="text" id="u-otp" placeholder="Enter OTP (1234)">
+                <button onclick="handleLogin('user')">Login</button>
             </div>
-        </nav>
-        
-        <div class="nav-cats">
-            <button class="cat-btn">Biryanis</button>
-            <button class="cat-btn">Fried Rice</button>
-            <button class="cat-btn">Snacks</button>
-            <button class="cat-btn">Drinks</button>
+            <p onclick="switchLogin('admin')" style="cursor:pointer; font-size:0.8rem; margin-top:20px; color:var(--accent);">Admin Access</p>
         </div>
 
-        <div class="food-grid" id="menu-items">
-            </div>
-    </div>
-
-    <div id="admin-dashboard" class="hidden" style="padding: 20px 5%;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-            <h1>Admin Dashboard</h1>
-            <button onclick="exitAdmin()" style="background:#e53e3e;">Exit Admin</button>
-        </div>
-        <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748;">
-            <h3>Add New Item</h3>
-            <input type="text" id="new-item-name" placeholder="Item Name">
-            <input type="number" id="new-item-price" placeholder="Base Price (₹)">
-            <button onclick="alert('Item Added (Simulated)')">Upload Item</button>
-        </div>
-    </div>
-
-    <div id="checkout-modal" class="modal-overlay hidden">
-        <div class="glass-card">
-            <h2>Complete Order</h2>
-            <p id="cart-summary" style="font-size: 0.9rem; color: var(--accent-light);"></p>
-            <hr style="border: 0.5px solid rgba(255,255,255,0.1); margin: 20px 0;">
-            <input type="text" id="cust-name" placeholder="Enter Your Name">
-            <input type="tel" id="cust-phone" placeholder="Enter Phone Number">
-            <button class="checkout-btn" onclick="submitOrder()">Place Order (WhatsApp)</button>
-            <p style="cursor:pointer; font-size:0.8rem; margin-top:15px;" onclick="closeModals()">Cancel</p>
-        </div>
-    </div>
-
-    <div id="admin-modal" class="modal-overlay hidden">
-        <div class="glass-card">
-            <h2>Staff Portal</h2>
+        <div class="glass-card hidden" id="admin-login-box">
+            <h2>Admin Portal</h2>
             <input type="text" id="a-id" placeholder="Admin ID">
             <input type="password" id="a-pass" placeholder="Password">
-            <button onclick="adminLogin()">Login</button>
-            <p style="cursor:pointer; font-size:0.8rem; margin-top:15px;" onclick="closeModals()">Cancel</p>
+            <button onclick="handleLogin('admin')">Login Admin</button>
+            <p onclick="switchLogin('user')" style="cursor:pointer; font-size:0.8rem; margin-top:20px;">User View</p>
+        </div>
+    </div>
+
+    <div id="user-dashboard" class="hidden">
+        <nav class="navbar">
+            <div class="logo">THE NIGHT<span>HUNGER</span></div>
+            <div>
+                <button onclick="checkout()">🛒 Checkout</button>
+                <button id="logout-trigger" class="logout-btn" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+        <div class="food-grid" id="menu-items"></div>
+    </div>
+
+    <div id="admin-dashboard" class="hidden">
+        <div style="padding: 20px 5%;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h1>Admin Panel</h1>
+                <div>
+                    <button class="view-btn" onclick="toggleAdminView()">👁️ View UI</button>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            
+            <div class="glass-card" style="width: 100%; text-align: left; background: #2d3748; margin-top: 20px;">
+                <h3>Add Food Item</h3>
+                <input type="text" id="new-item-name" placeholder="Food Name">
+                <input type="number" id="new-item-price" placeholder="Price (₹)">
+                <input type="file" id="new-item-img" accept="image/*">
+                <label><input type="checkbox" id="parcel-toggle" checked> Apply Parcel Charge (₹15)</label>
+                <button onclick="addItem()" style="margin-top:10px;">Post Item</button>
+            </div>
+
+            <h2 style="margin-top:40px;">Recent Orders</h2>
+            <div id="admin-order-list"><p>No orders yet.</p></div>
         </div>
     </div>
 
     <script>
-        const PARCEL_CHARGE = 15;
-        let cart = [];
-
-        const menuItems = [
-            { id: 1, name: "Chicken Biryani", price: 220, img: "https://images.unsplash.com/photo-1630409351241-e90e76d94132?w=400" },
-            { id: 2, name: "Egg Fried Rice", price: 150, img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400" },
-            { id: 3, name: "Manchuria", price: 120, img: "https://images.unsplash.com/photo-1512152272829-e3139592d56f?w=400" }
+        const DEFAULT_PARCEL_CHARGE = 15;
+        let menuItems = JSON.parse(localStorage.getItem('savedMenu')) || [
+            { id: 1, name: "Chicken Biryani", price: 220, img: "https://images.unsplash.com/photo-1630409351241-e90e76d94132?w=400", parcel: true },
+            { id: 2, name: "Egg Fried Rice", price: 150, img: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=400", parcel: true }
         ];
+        let currentCart = [];
+        let isAdminPreview = false;
 
-       
+        window.onload = () => {
+            const savedRole = localStorage.getItem('userRole');
+            if (savedRole) enterApp(savedRole);
+            renderAdminOrders();
+        };
+
+        function handleLogin(role) {
+            if (role === 'admin') {
+                if(document.getElementById('a-id').value === "havi-reddy" && document.getElementById('a-pass').value === "123456789") {
+                    localStorage.setItem('userRole', 'admin');
+                    enterApp('admin');
+                } else alert("Wrong credentials");
+            } else {
+                if(document.getElementById('u-otp').value === "1234") {
+                    localStorage.setItem('userRole', 'user');
+                    localStorage.setItem('userName', document.getElementById('u-name').value);
+                    localStorage.setItem('userPhone', document.getElementById('u-phone').value);
+                    enterApp('user');
+                } else alert("Invalid OTP");
+            }
+        }
+
+        function enterApp(role) {
+            document.getElementById('login-layer').classList.add('hidden');
+            document.getElementById(role + '-dashboard').classList.remove('hidden');
+            if (role === 'user') renderMenu();
+        }
+
+     
+        function toggleAdminView() {
+            const userDash = document.getElementById('user-dashboard');
+            const adminDash = document.getElementById('admin-dashboard');
+            const previewBar = document.getElementById('admin-preview-bar');
+            const logoutBtn = document.getElementById('logout-trigger');
+
+            if (!isAdminPreview) {
+                 
+                adminDash.classList.add('hidden');
+                userDash.classList.remove('hidden');
+                previewBar.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');  
+                renderMenu();
+                isAdminPreview = true;
+            } else {
+            
+                userDash.classList.add('hidden');
+                adminDash.classList.remove('hidden');
+                previewBar.classList.add('hidden');
+                isAdminPreview = false;
+            }
+        }
+
+        function logout() { localStorage.clear(); location.reload(); }
+
         function renderMenu() {
             const grid = document.getElementById('menu-items');
             grid.innerHTML = menuItems.map(item => `
                 <div class="food-card">
                     <img src="${item.img}" alt="${item.name}">
                     <h3>${item.name}</h3>
-                    <span class="price-tag">₹${item.price}</span>
-                    <span class="parcel-info">+ ₹${PARCEL_CHARGE} Parcel Fee</span>
-                    <button onclick="addToCart(${item.id})">Add to Basket</button>
+                    <div class="price-tag">₹${item.price} ${item.parcel ? `<span style="font-size:0.8rem; color:gray;">+₹${DEFAULT_PARCEL_CHARGE} Parcel</span>` : ''}</div>
+                    <button onclick="${isAdminPreview ? "alert('Preview Mode: Actions Disabled')" : `addToCart(${item.id})`}">Add to Cart</button>
                 </div>
             `).join('');
         }
 
-         
         function addToCart(id) {
             const item = menuItems.find(i => i.id === id);
-            cart.push(item);
-            document.getElementById('cart-count').innerText = cart.length;
-            alert(`${item.name} added!`);
+            currentCart.push(item);
+            alert(item.name + " added!");
         }
 
-        function openCheckoutModal() {
-            if (cart.length === 0) return alert("Your basket is empty!");
-            const total = cart.reduce((sum, item) => sum + item.price + PARCEL_CHARGE, 0);
-            document.getElementById('cart-summary').innerText = `Items: ${cart.length} | Total: ₹${total}`;
-            document.getElementById('checkout-modal').classList.remove('hidden');
+        function checkout() {
+            if(isAdminPreview) return alert("Preview Mode: You cannot place orders.");
+            if(currentCart.length === 0) return alert("Cart empty");
+            const orderData = {
+                user: localStorage.getItem('userName'),
+                phone: localStorage.getItem('userPhone'),
+                items: currentCart,
+                total: currentCart.reduce((sum, item) => sum + item.price + (item.parcel ? DEFAULT_PARCEL_CHARGE : 0), 0)
+            };
+            let orders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+            orders.push(orderData);
+            localStorage.setItem('pendingOrders', JSON.stringify(orders));
+            alert("Order placed! Notify Admin.");
+            currentCart = [];
         }
 
-        function submitOrder() {
-            const name = document.getElementById('cust-name').value;
-            const phone = document.getElementById('cust-phone').value;
+        function addItem() {
+            const name = document.getElementById('new-item-name').value;
+            const price = parseInt(document.getElementById('new-item-price').value);
+            const parcel = document.getElementById('parcel-toggle').checked;
+            const imgInput = document.getElementById('new-item-img');
 
-            if (!name || !phone) return alert("Please enter Name and Phone");
-
-            const itemsText = cart.map(i => i.name).join(', ');
-            const total = cart.reduce((sum, item) => sum + item.price + PARCEL_CHARGE, 0);
-            
-            const message = `Namaskaram! New Order from ${name} (${phone}):\nItems: ${itemsText}\nTotal: ₹${total}\n(Parcel Charges Included)`;
-            
-             
-            const adminPhone = "9393969353"; 
-            window.open(`https://wa.me/${adminPhone}?text=${encodeURIComponent(message)}`, '_blank');
-            
-            cart = [];
-            document.getElementById('cart-count').innerText = "0";
-            closeModals();
-            alert("Order sent to kitchen!");
+            if (name && price && imgInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    menuItems.push({ id: Date.now(), name, price, img: e.target.result, parcel });
+                    localStorage.setItem('savedMenu', JSON.stringify(menuItems));
+                    alert("Food Posted!");
+                    location.reload();
+                };
+                reader.readAsDataURL(imgInput.files[0]);
+            } else alert("Fill all fields");
         }
 
-      
-        function openAdminModal() { document.getElementById('admin-modal').classList.remove('hidden'); }
-        
-        function adminLogin() {
-            const id = document.getElementById('a-id').value;
-            const pass = document.getElementById('a-pass').value;
-            if (id === "havi-reddy" && pass === "123456789") {
-                document.getElementById('user-app').classList.add('hidden');
-                document.getElementById('admin-dashboard').classList.remove('hidden');
-                closeModals();
-            } else { alert("Invalid Staff ID"); }
+        function renderAdminOrders() {
+            const container = document.getElementById('admin-order-list');
+            const orders = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+            if(orders.length === 0) return;
+            container.innerHTML = orders.map((order, index) => `
+                <div class="order-notification">
+                    <p><strong>Customer:</strong> ${order.user} (${order.phone})</p>
+                    <p><strong>Total:</strong> ₹${order.total}</p>
+                    <button onclick="acceptOrder(${index})">✅ Accept & Bill</button>
+                </div>
+            `).join('');
         }
 
-        function exitAdmin() {
-            document.getElementById('admin-dashboard').classList.add('hidden');
-            document.getElementById('user-app').classList.remove('hidden');
+        function acceptOrder(index) {
+            const orders = JSON.parse(localStorage.getItem('pendingOrders'));
+            const order = orders[index];
+            const billText = `BILL: ${order.user}%0AItems: ${order.items.map(i => i.name).join(', ')}%0ATotal: ₹${order.total}`;
+            window.open(`https://wa.me/91${order.phone}?text=${billText}`, '_blank');
+            orders.splice(index, 1);
+            localStorage.setItem('pendingOrders', JSON.stringify(orders));
+            renderAdminOrders();
         }
 
-        function closeModals() {
-            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.add('hidden'));
+        function switchLogin(type) {
+            document.getElementById('user-login-box').classList.toggle('hidden', type === 'admin');
+            document.getElementById('admin-login-box').classList.toggle('hidden', type === 'user');
         }
 
-        window.onload = renderMenu;
+        function mockSendOTP() { document.getElementById('otp-area').classList.remove('hidden'); alert("OTP: 1234"); }
     </script>
 </body>
 </html>
