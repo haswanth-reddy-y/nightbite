@@ -160,140 +160,167 @@
     
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, setDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getFirestore, 
+        collection, 
+        addDoc, 
+        onSnapshot, 
+        doc, 
+        updateDoc, 
+        setDoc, 
+        query, 
+        orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-      const firebaseConfig = {
-  apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
-  authDomain: "nighthunger-e55e1.firebaseapp.com",
-  databaseURL: "https://nighthunger-e55e1-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "nighthunger-e55e1",
-  storageBucket: "nighthunger-e55e1.firebasestorage.app",
-  messagingSenderId: "129732701448",
-  appId: "1:129732701448:web:eb136b05c3e20414c590bd",
-  measurementId: "G-F3RLH8HB4J"
-};
+    // 1. Corrected Firebase Configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
+        authDomain: "nighthunger-e55e1.firebaseapp.com",
+        projectId: "nighthunger-e55e1",
+        storageBucket: "nighthunger-e55e1.firebasestorage.app",
+        messagingSenderId: "129732701448",
+        appId: "1:129732701448:web:eb136b05c3e20414c590bd",
+        measurementId: "G-F3RLH8HB4J"
+    };
 
+    // 2. Initialize Firebase and Firestore
+    let app, db;
+    try {
+        app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        console.log("Firebase Connected Successfully! 🔥");
+    } catch (error) {
+        console.error("Firebase Initialization Error:", error);
+        alert("Database connection failed. Check your API key.");
+    }
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // --- Application Logic ---
+    let cart = [];
+    let parcelPrice = 0;
+    let user = JSON.parse(localStorage.getItem('campusUser')) || null;
 
-        let cart = [];
-        let parcelPrice = 0;
-        let user = JSON.parse(localStorage.getItem('campusUser')) || null;
+    if(user) document.getElementById('userStatus').innerText = `Yo, ${user.name.split(' ')[0]}!`;
 
-        if(user) document.getElementById('userStatus').innerText = `Yo, ${user.name.split(' ')[0]}!`;
-
-        onSnapshot(doc(db, "settings", "global"), (snap) => {
-            if(snap.exists()) {
-                parcelPrice = snap.data().parcel || 0;
-                document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
-                updateTotals();
-            }
-        });
-
-        onSnapshot(collection(db, "menu"), (snap) => {
-            const grid = document.getElementById('menuGrid');
-            grid.innerHTML = '';
-            snap.forEach(d => {
-                const item = d.data();
-                grid.innerHTML += `
-                    <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500 relative">
-                        <div class="relative h-56 overflow-hidden">
-                            <img src="${item.image}" class="h-full w-full object-cover group-hover:scale-110 transition duration-700">
-                            <div class="absolute inset-0 bg-gradient-to-t from-[#020617] to-transparent"></div>
-                        </div>
-                        <div class="p-8 relative">
-                            <h3 class="font-bold text-white text-xl mb-2">${item.name}</h3>
-                            <div class="flex justify-between items-center mt-6">
-                                <span class="text-3xl font-black text-white">₹${item.price}</span>
-                                
-                                <div class="tooltip-container">
-                                    <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center btn-glow transition-all">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                    <span class="tooltip-popup">Add to Tray</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-            const list = document.getElementById('orderList');
-            list.innerHTML = '';
-            snap.forEach(d => {
-                const o = d.data();
-                if(o.status === "pending") {
-                    list.innerHTML += `
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center">
-                            <div>
-                                <h4 class="font-black text-white text-xl uppercase tracking-tighter">${o.userName}</h4>
-                                <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">${o.phone}</p>
-                                <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
-                                <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
-                            </div>
-                            <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl shadow-green-900/30">ACCEPT ORDER</button>
-                        </div>`;
-                }
-            });
-        });
-
-        window.openModal = (type) => {
-            document.getElementById('masterModal').classList.add('modal-active');
-            document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
-            document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
-        }
-        window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
-        window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
-
-        window.addToCart = (name, price) => {
-            cart.push({ name, price });
-            renderCart();
-            if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
-        }
-
-        window.renderCart = () => {
-            const list = document.getElementById('cartList');
-            list.innerHTML = cart.map((item, i) => `
-                <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                    <div>
-                        <span class="block text-white font-bold text-sm">${item.name}</span>
-                        <span class="text-orange-500 font-black text-xs">₹${item.price}</span>
-                    </div>
-                    <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
-                </div>`).join('');
-            document.getElementById('cartCount').innerText = cart.length;
+    // Listen for global settings (Parcel Fee)
+    onSnapshot(doc(db, "settings", "global"), (snap) => {
+        if(snap.exists()) {
+            parcelPrice = snap.data().parcel || 0;
+            document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
             updateTotals();
         }
+    });
 
-        window.removeFromCart = (i) => {
-            cart.splice(i, 1);
-            renderCart();
-        }
+    // Listen for Menu Updates
+    onSnapshot(collection(db, "menu"), (snap) => {
+        const grid = document.getElementById('menuGrid');
+        grid.innerHTML = '';
+        snap.forEach(d => {
+            const item = d.data();
+            grid.innerHTML += `
+                <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500 relative">
+                    <div class="relative h-56 overflow-hidden">
+                        <img src="${item.image}" class="h-full w-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-[#020617] to-transparent"></div>
+                    </div>
+                    <div class="p-8 relative">
+                        <h3 class="font-bold text-white text-xl mb-2">${item.name}</h3>
+                        <div class="flex justify-between items-center mt-6">
+                            <span class="text-3xl font-black text-white">₹${item.price}</span>
+                            <div class="tooltip-container">
+                                <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center btn-glow transition-all">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <span class="tooltip-popup">Add to Tray</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    });
 
-        window.updateTotals = () => {
-            const foodTotal = cart.reduce((s, i) => s + i.price, 0);
-            const total = foodTotal + (cart.length * parcelPrice);
-            document.getElementById('totalDisplay').innerText = `₹${total}`;
-        }
+    // Listen for Incoming Orders (Admin side)
+    onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+        const list = document.getElementById('orderList');
+        if(!list) return; // Guard for non-admin view
+        list.innerHTML = '';
+        snap.forEach(d => {
+            const o = d.data();
+            if(o.status === "pending") {
+                list.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center">
+                        <div>
+                            <h4 class="font-black text-white text-xl uppercase tracking-tighter">${o.userName}</h4>
+                            <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">${o.phone}</p>
+                            <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
+                            <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
+                        </div>
+                        <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl shadow-green-900/30">ACCEPT ORDER</button>
+                    </div>`;
+            }
+        });
+    });
 
-        window.registerUser = async () => {
-            const name = document.getElementById('uName').value;
-            const phone = document.getElementById('uPhone').value;
-            const pass = document.getElementById('uPass').value;
-            if(!name || !phone || !pass) return alert("All fields are required!");
-            user = { name, phone };
+    // Expose functions to global window scope for HTML onclick events
+    window.openModal = (type) => {
+        document.getElementById('masterModal').classList.add('modal-active');
+        document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
+        document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
+    };
+
+    window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
+    
+    window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+
+    window.addToCart = (name, price) => {
+        cart.push({ name, price });
+        renderCart();
+        if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
+    };
+
+    window.renderCart = () => {
+        const list = document.getElementById('cartList');
+        list.innerHTML = cart.map((item, i) => `
+            <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
+                <div>
+                    <span class="block text-white font-bold text-sm">${item.name}</span>
+                    <span class="text-orange-500 font-black text-xs">₹${item.price}</span>
+                </div>
+                <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>`).join('');
+        document.getElementById('cartCount').innerText = cart.length;
+        updateTotals();
+    };
+
+    window.removeFromCart = (i) => {
+        cart.splice(i, 1);
+        renderCart();
+    };
+
+    window.updateTotals = () => {
+        const foodTotal = cart.reduce((s, i) => s + i.price, 0);
+        const total = foodTotal + (cart.length * parcelPrice);
+        document.getElementById('totalDisplay').innerText = `₹${total}`;
+    };
+
+    window.registerUser = async () => {
+        const name = document.getElementById('uName').value;
+        const phone = document.getElementById('uPhone').value;
+        const pass = document.getElementById('uPass').value;
+        if(!name || !phone || !pass) return alert("All fields are required!");
+        user = { name, phone };
+        try {
             await addDoc(collection(db, "users"), { ...user, pass });
             localStorage.setItem('campusUser', JSON.stringify(user));
             location.reload();
-        }
+        } catch (e) { alert("Error registering user: " + e.message); }
+    };
 
-        window.placeOrder = async () => {
-            if(!user) return openModal('user');
-            if(cart.length === 0) return alert("Your tray is empty!");
-            const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
+    window.placeOrder = async () => {
+        if(!user) return openModal('user');
+        if(cart.length === 0) return alert("Your tray is empty!");
+        const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
+        try {
             await addDoc(collection(db, "orders"), {
                 userName: user.name,
                 phone: user.phone,
@@ -304,37 +331,43 @@
             });
             alert("Order placed successfully! 🍕✨");
             cart = []; renderCart(); toggleCart();
-        }
+        } catch (e) { alert("Order failed: " + e.message); }
+    };
 
-        window.verifyAdmin = () => {
-            const id = document.getElementById('aID').value;
-            const pass = document.getElementById('aPass').value;
-            if(id === "havi" && pass === "1234567890") {
-                document.getElementById('adminDash').classList.remove('hidden');
-                closeModal();
-            } else alert("Invalid Admin ID or Password");
-        }
+    window.verifyAdmin = () => {
+        const id = document.getElementById('aID').value;
+        const pass = document.getElementById('aPass').value;
+        // Tip: For production, use Firebase Auth instead of hardcoded creds!
+        if(id === "havi" && pass === "1234567890") {
+            document.getElementById('adminDash').classList.remove('hidden');
+            closeModal();
+        } else alert("Invalid Admin ID or Password");
+    };
 
-        window.dbAddMenuItem = async () => {
-            const name = document.getElementById('mName').value;
-            const price = Number(document.getElementById('mPrice').value);
-            const image = document.getElementById('mImg').value;
-            if(!name || !price) return alert("Item details missing!");
-            await addDoc(collection(db, "menu"), { name, price, image });
-            alert("New item added to menu!");
-            document.getElementById('mName').value = ''; document.getElementById('mPrice').value = ''; document.getElementById('mImg').value = '';
-        }
+    window.dbAddMenuItem = async () => {
+        const name = document.getElementById('mName').value;
+        const price = Number(document.getElementById('mPrice').value);
+        const image = document.getElementById('mImg').value;
+        if(!name || !price) return alert("Item details missing!");
+        await addDoc(collection(db, "menu"), { name, price, image });
+        alert("New item added to menu!");
+        document.getElementById('mName').value = ''; 
+        document.getElementById('mPrice').value = ''; 
+        document.getElementById('mImg').value = '';
+    };
 
-        window.dbSetParcel = async () => {
-            const p = Number(document.getElementById('pInput').value);
-            await setDoc(doc(db, "settings", "global"), { parcel: p });
-            alert("Global settings updated!");
-        }
+    window.dbSetParcel = async () => {
+        const p = Number(document.getElementById('pInput').value);
+        await setDoc(doc(db, "settings", "global"), { parcel: p });
+        alert("Global settings updated!");
+    };
 
-        window.confirmOrder = async (id, phone, bill) => {
+    window.confirmOrder = async (id, phone, bill) => {
+        try {
             await updateDoc(doc(db, "orders", id), { status: "accepted" });
             alert(`ORDER CONFIRMED: Bill of ₹${bill} for ${phone}`);
-        }
-    </script>
+        } catch (e) { alert("Error: " + e.message); }
+    };
+</script>
 </body>
 </html>
