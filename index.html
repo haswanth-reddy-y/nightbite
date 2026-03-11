@@ -46,11 +46,10 @@
         </h1>
         <div class="flex items-center gap-5">
            <div class="flex flex-col sm:flex-row justify-between items-center mb-12 border-b border-slate-800 pb-8 gap-6">
-    <h2 class="text-3xl font-black tracking-tighter uppercase">ADMIN <span class="text-orange-500">CONSOLE</span></h2>
-    <div class="flex flex-wrap justify-center gap-3">
-        <button onclick="toggleAdminView('orders')" class="bg-slate-800 text-white px-4 py-2 md:px-6 md:py-3 rounded-xl font-bold hover:bg-orange-600 text-xs md:text-base">Orders</button>
-        <button onclick="toggleAdminView('menu')" class="bg-slate-800 text-white px-4 py-2 md:px-6 md:py-3 rounded-xl font-bold hover:bg-orange-600 text-xs md:text-base">Menu</button>
-        <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-4 py-2 md:px-8 md:py-3 rounded-xl border border-red-500/20 text-xs md:text-base">Logout</button>
+   <button onclick="openModal('admin')" class="text-slate-500 hover:text-orange-400 transition-colors flex items-center gap-1">
+    <i class="fas fa-user-shield text-lg md:text-sm"></i>
+    <span class="text-[10px] tracking-widest uppercase font-bold hidden md:inline">Admin Access</span>
+</button>
     </div>
 </div>
             <div class="flex items-center gap-2">
