@@ -14,15 +14,22 @@
         .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); }
         .gradient-text { background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-glow:hover { box-shadow: 0 0 20px rgba(249, 115, 22, 0.4); transform: translateY(-2px); }
-        .tooltip-container { position: relative; }
-        .tooltip-popup {
-            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%) scale(0.8);
-            background: #1e293b; color: white; padding: 6px 12px; border-radius: 8px;
-            font-size: 11px; font-weight: 700; white-space: nowrap; opacity: 0;
-            pointer-events: none; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
+     
+        .menu-card { position: relative; overflow: hidden; transition: all 0.5s ease; }
+        .menu-card:hover { transform: translateY(-10px); }
+        .hover-overlay {
+            position: absolute; inset: 0; background: rgba(249, 115, 22, 0.15);
+            backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: all 0.3s ease; z-index: 10; pointer-events: none;
         }
-        .tooltip-container:hover .tooltip-popup { opacity: 1; transform: translateX(-50%) scale(1); }
+        .menu-card:hover .hover-overlay { opacity: 1; }
+        .quick-tag { 
+            background: white; color: #ea580c; padding: 6px 15px; border-radius: 99px; 
+            font-weight: 800; font-size: 10px; text-transform: uppercase;
+            transform: translateY(20px); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .menu-card:hover .quick-tag { transform: translateY(0); }
+
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
         .animate-float { animation: float 3s ease-in-out infinite; }
     </style>
@@ -35,15 +42,13 @@
         </h1>
         <div class="flex items-center gap-5">
             <button onclick="openModal('admin')" class="text-[10px] tracking-widest uppercase font-bold text-slate-500 hover:text-orange-400 transition-colors hidden md:block">Staff Access</button>
-
             <div class="flex items-center gap-2">
-                <button id="userStatus" onclick="openModal('user')" class="bg-slate-800/80 text-white px-5 py-2 rounded-xl font-semibold border border-slate-700 hover:border-orange-500/50 transition-all">Sign In</button>
+                <button id="userStatus" onclick="openModal('user')" class="bg-slate-800/80 text-white px-5 py-2 rounded-xl font-semibold border border-slate-700 hover:border-orange-500/50">Sign In</button>
                 <button id="signOutBtn" onclick="signOutUser()" class="hidden bg-red-500/10 text-red-500 p-2.5 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
                     <i class="fas fa-sign-out-alt"></i>
                 </button>
             </div>
-
-            <button onclick="toggleCart()" class="relative bg-orange-600 p-2.5 rounded-xl btn-glow transition-all">
+            <button onclick="toggleCart()" class="relative bg-orange-600 p-2.5 rounded-xl btn-glow">
                 <i class="fas fa-shopping-basket text-xl text-white"></i>
                 <span id="cartCount" class="absolute -top-2 -right-2 bg-white text-orange-600 text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center border-2 border-orange-600">0</span>
             </button>
@@ -56,111 +61,84 @@
                 <h2 class="text-5xl font-black text-white mb-3 tracking-tight">Midnight <span class="text-orange-500">Fuel.</span> 🍔</h2>
                 <p class="text-slate-400 text-lg">Your hostel wing's favorite late-night kitchen.</p>
             </div>
-            <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-2xl flex items-center gap-4 shadow-2xl">
+            <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-2xl flex items-center gap-4">
                 <div class="flex h-4 w-4 rounded-full bg-green-500 animate-pulse"></div>
-                <div>
-                    <span class="text-xs uppercase font-bold text-slate-500 block">Status</span>
-                    <span class="text-sm font-bold text-green-400">Taking Live Orders</span>
-                </div>
+                <span class="text-sm font-bold text-green-400">Taking Live Orders</span>
             </div>
         </div>
-        
-        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="col-span-full text-center py-24">
-                <i class="fas fa-spinner animate-spin text-5xl text-orange-500 mb-6"></i>
-                <p class="text-slate-500 tracking-widest uppercase font-bold text-xs">Curating Your Cravings...</p>
-            </div>
-        </div>
+        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8"></div>
     </main>
-
-    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full max-w-sm bg-[#0f172a] shadow-[0_0_50px_rgba(0,0,0,0.8)] translate-x-full transition-transform duration-500 z-[100] flex flex-col border-l border-slate-800">
-        <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-            <h2 class="text-xl font-black uppercase tracking-tighter text-white">Your Tray</h2>
-            <button onclick="toggleCart()" class="text-slate-500 hover:text-white transition text-3xl">&times;</button>
-        </div>
-        <div id="cartList" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
-        <div class="p-8 border-t border-slate-800 bg-[#020617] space-y-4">
-            <div class="flex justify-between text-slate-500 font-bold uppercase text-[10px] tracking-widest">
-                <span>Parcel Fee (per item)</span>
-                <span id="parcelDisplay" class="text-orange-500 font-black">₹0</span>
-            </div>
-            <div class="flex justify-between items-end pb-4">
-                <span class="text-slate-400 text-sm font-bold">Total Payable</span>
-                <span id="totalDisplay" class="text-4xl font-black text-white">₹0</span>
-            </div>
-            <button onclick="placeOrder()" class="w-full bg-orange-600 hover:bg-orange-500 text-white py-5 rounded-2xl font-black text-lg shadow-xl transition-all uppercase tracking-widest">Blast Order 🚀</button>
-        </div>
-    </div>
-
-    <div id="masterModal" class="fixed inset-0 bg-[#020617]/95 z-[200] hidden items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-[#0f172a] rounded-[2.5rem] p-10 w-full max-w-md relative border border-slate-800 shadow-2xl">
-            <button onclick="closeModal()" class="absolute top-8 right-8 text-slate-500 hover:text-white text-2xl">&times;</button>
-            
-            <div id="userFields" class="hidden">
-                <h3 class="text-3xl font-black mb-2 text-white">Student Sign-In</h3>
-                <p class="text-slate-500 mb-8 text-sm">Join the "The Night Bite" community.</p>
-                <input type="text" id="uName" placeholder="Full Name" class="w-full bg-slate-900/50 border border-slate-800 p-4 mb-3 rounded-2xl text-white outline-none focus:border-orange-500 transition-all">
-                <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full bg-slate-900/50 border border-slate-800 p-4 mb-3 rounded-2xl text-white outline-none focus:border-orange-500 transition-all">
-                <input type="password" id="uPass" placeholder="Secret Password" class="w-full bg-slate-900/50 border border-slate-800 p-4 mb-8 rounded-2xl text-white outline-none focus:border-orange-500 transition-all">
-                <button onclick="registerUser()" class="w-full bg-white text-slate-900 py-4 rounded-2xl font-black text-lg hover:bg-orange-500 hover:text-white transition-all">Enter Kitchen</button>
-            </div>
-
-            <div id="adminFields" class="hidden text-center">
-                <div class="inline-block p-5 bg-orange-500/10 rounded-full mb-6">
-                    <i class="fas fa-lock text-3xl text-orange-500"></i>
-                </div>
-                <h3 class="text-2xl font-black text-white uppercase tracking-tighter mb-8">Admin Authorization</h3>
-                <input type="text" id="aID" placeholder="Admin ID" class="w-full bg-slate-900 p-4 mb-3 rounded-2xl text-white outline-none border border-slate-800">
-                <input type="password" id="aPass" placeholder="Password" class="w-full bg-slate-900 p-4 mb-8 rounded-2xl text-white outline-none border border-slate-800">
-                <button onclick="verifyAdmin()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-500 transition-all">Login</button>
-            </div>
-        </div>
-    </div>
 
     <div id="adminDash" class="fixed inset-0 bg-[#020617] z-[300] hidden overflow-y-auto p-8">
         <div class="max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-12 border-b border-slate-800 pb-8">
-                <h2 class="text-3xl font-black tracking-tighter">ADMIN <span class="text-orange-500">CONSOLE</span></h2>
+                <h2 class="text-3xl font-black tracking-tighter uppercase">ADMIN <span class="text-orange-500">CONSOLE</span></h2>
                 <div class="flex gap-4">
-                    <button onclick="toggleAdminView('orders')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all">Orders</button>
-                    <button onclick="toggleAdminView('menu')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all">Manage Menu</button>
-                    <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-8 py-3 rounded-2xl font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">Logout</button>
-                </div>
-            </div>
-
-            <div id="adminOrdersView" class="grid lg:grid-cols-3 gap-12">
-                <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
-                    <h4 class="font-black mb-4 text-xs text-slate-500 uppercase tracking-widest">Global Packing Charge</h4>
-                    <div class="flex gap-4">
-                        <input type="number" id="pInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white" placeholder="₹">
-                        <button onclick="dbSetParcel()" class="bg-white text-slate-900 px-6 rounded-xl font-bold uppercase text-xs">Set</button>
-                    </div>
-                </div>
-                <div class="lg:col-span-2">
-                    <h3 class="text-2xl font-black mb-8 flex items-center gap-3">Incoming Orders <span class="h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span></h3>
-                    <div id="orderList" class="space-y-4"></div>
+                    <button onclick="toggleAdminView('orders')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600">Orders</button>
+                    <button onclick="toggleAdminView('menu')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600">Menu Manager</button>
+                    <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-8 py-3 rounded-xl border border-red-500/20">Logout</button>
                 </div>
             </div>
 
             <div id="adminMenuView" class="hidden grid lg:grid-cols-3 gap-12">
-                <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
-                    <h4 class="font-black mb-8 uppercase text-xs tracking-widest text-slate-500">Add New Dish</h4>
-                    <input type="text" id="mName" placeholder="Item Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
-                    <input type="number" id="mPrice" placeholder="Price (₹)" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
-                    <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white">
+                <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit sticky top-8">
+                    <h4 class="font-black mb-6 uppercase text-xs text-slate-500">Add New Dish</h4>
+                    <input type="text" id="mName" placeholder="Dish Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none focus:border-orange-500">
+                    <input type="number" id="mPrice" placeholder="Price (₹)" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none focus:border-orange-500">
+                    
+                    <select id="mCategory" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none focus:border-orange-500">
+                        <option value="Biryanis">Biryanis 🍛</option>
+                        <option value="Noodles">Noodles 🍜</option>
+                        <option value="Fried Rice">Fried Rice 🍚</option>
+                        <option value="Starters">Starters 🍗</option>
+                        <option value="Beverages">Beverages 🥤</option>
+                    </select>
+
+                    <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white outline-none focus:border-orange-500">
                     <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest">Add to Menu</button>
                 </div>
+                
                 <div class="lg:col-span-2">
-                    <h3 class="text-2xl font-black mb-8">Live Menu (Click trash to delete)</h3>
+                    <div class="mb-8 relative">
+                        <input type="text" id="adminSearch" oninput="searchMenu()" placeholder="Search menu items..." class="w-full bg-slate-900 border border-slate-800 p-4 pl-12 rounded-2xl text-white outline-none focus:border-orange-500">
+                        <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                    </div>
                     <div id="adminMenuList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
+            </div>
+
+            <div id="adminOrdersView" class="grid lg:grid-cols-3 gap-12">
+                <div class="lg:col-span-3" id="orderList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full max-w-sm bg-[#0f172a] translate-x-full transition-transform z-[100] border-l border-slate-800 flex flex-col">
+        <div class="p-6 border-b border-slate-800 flex justify-between items-center"><h2 class="text-white font-black">YOUR TRAY</h2><button onclick="toggleCart()" class="text-white text-2xl">&times;</button></div>
+        <div id="cartList" class="flex-grow p-6 overflow-y-auto space-y-4"></div>
+        <div class="p-6 border-t border-slate-800">
+            <div class="flex justify-between mb-4"><span class="text-slate-400">Total</span><span id="totalDisplay" class="text-2xl font-black text-white">₹0</span></div>
+            <button onclick="placeOrder()" class="w-full bg-orange-600 py-4 rounded-xl font-black uppercase">Blast Order</button>
+        </div>
+    </div>
+
+    <div id="masterModal" class="fixed inset-0 bg-[#020617]/95 z-[200] hidden items-center justify-center p-4">
+        <div class="bg-[#0f172a] rounded-[2.5rem] p-10 w-full max-w-md relative border border-slate-800">
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-white">&times;</button>
+            <div id="userFields" class="hidden">
+                <h3 class="text-white text-2xl font-black mb-6">Student Sign-In</h3>
+                <input type="text" id="uName" placeholder="Full Name" class="w-full bg-slate-900 p-4 mb-3 rounded-xl border border-slate-800 text-white"><input type="tel" id="uPhone" placeholder="Phone" class="w-full bg-slate-900 p-4 mb-3 rounded-xl border border-slate-800 text-white"><input type="password" id="uPass" placeholder="Password" class="w-full bg-slate-900 p-4 mb-6 rounded-xl border border-slate-800 text-white"><button onclick="registerUser()" class="w-full bg-orange-600 py-4 rounded-xl text-white font-black">Enter Kitchen</button>
+            </div>
+            <div id="adminFields" class="hidden">
+                <h3 class="text-white text-2xl font-black mb-6">Staff Access</h3>
+                <input type="text" id="aID" placeholder="Admin ID" class="w-full bg-slate-900 p-4 mb-3 rounded-xl border border-slate-800 text-white"><input type="password" id="aPass" placeholder="Password" class="w-full bg-slate-900 p-4 mb-6 rounded-xl border border-slate-800 text-white"><button onclick="verifyAdmin()" class="w-full bg-orange-600 py-4 rounded-xl text-white font-black">Login</button>
             </div>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, setDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
@@ -174,209 +152,87 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        let menuData = [];
         let cart = [];
-        let parcelPrice = 0;
         let user = JSON.parse(localStorage.getItem('campusUser')) || null;
  
-        window.addEventListener('keydown', (e) => {
-            if (e.key === "Escape") {
-                closeModal();
-                if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
-            }
-        });
- 
-        const updateUIForUser = () => {
-            const statusBtn = document.getElementById('userStatus');
-            const logoutBtn = document.getElementById('signOutBtn');
-            if (user) {
-                statusBtn.innerText = `Hi, ${user.name.split(' ')[0]}`;
-                statusBtn.onclick = null;
-                logoutBtn.classList.remove('hidden');
-            } else {
-                statusBtn.innerText = "Sign In";
-                statusBtn.onclick = () => openModal('user');
-                logoutBtn.classList.add('hidden');
-            }
-        };
-        updateUIForUser();
-
-        window.signOutUser = () => {
-            if(confirm("Ready to sign out?")) {
-                localStorage.removeItem('campusUser');
-                location.reload();
-            }
-        };
- 
-        onSnapshot(doc(db, "settings", "global"), (snap) => {
-            if(snap.exists()) {
-                parcelPrice = snap.data().parcel || 0;
-                document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
-                updateTotals();
-            }
-        });
-
         onSnapshot(collection(db, "menu"), (snap) => {
             const grid = document.getElementById('menuGrid');
             const adminList = document.getElementById('adminMenuList');
             grid.innerHTML = '';
             adminList.innerHTML = '';
+            menuData = [];
+
             snap.forEach(d => {
                 const item = d.data();
                 const id = d.id;
-                
+                menuData.push({ id, ...item });
+    
                 grid.innerHTML += `
-                    <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500">
-                        <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover"></div>
+                    <div class="menu-card glass-card rounded-[2.5rem] group">
+                        <div class="hover-overlay">
+                            <span class="quick-tag">Quick Add +</span>
+                        </div>
+                        <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover transition duration-700 group-hover:scale-110"></div>
                         <div class="p-8">
-                            <h3 class="font-bold text-white text-xl mb-2">${item.name}</h3>
-                            <div class="flex justify-between items-center mt-6">
-                                <span class="text-3xl font-black text-white">₹${item.price}</span>
-                                <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center btn-glow"><i class="fas fa-plus"></i></button>
+                            <span class="text-[10px] text-orange-500 font-bold uppercase tracking-widest">${item.category || 'Food'}</span>
+                            <h3 class="font-bold text-white text-xl mb-4">${item.name}</h3>
+                            <div class="flex justify-between items-center">
+                                <span class="text-2xl font-black text-white">₹${item.price}</span>
+                                <button onclick="addToCart('${item.name}', ${item.price})" class="relative z-20 bg-orange-600 text-white h-10 w-10 rounded-xl flex items-center justify-center"><i class="fas fa-plus"></i></button>
                             </div>
                         </div>
                     </div>`;
+                renderAdminItem(id, item);
+            });
+        });
+ 
+        window.searchMenu = () => {
+            const term = document.getElementById('adminSearch').value.toLowerCase();
+            const adminList = document.getElementById('adminMenuList');
+            adminList.innerHTML = '';
+            menuData.filter(i => i.name.toLowerCase().includes(term) || i.category?.toLowerCase().includes(term))
+                    .forEach(i => renderAdminItem(i.id, i));
+        };
 
-                adminList.innerHTML += `
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
-                            <span class="text-white font-bold">${item.name} (₹${item.price})</span>
+        function renderAdminItem(id, item) {
+            const adminList = document.getElementById('adminMenuList');
+            adminList.innerHTML += `
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
+                        <div>
+                            <p class="text-white font-bold text-sm">${item.name}</p>
+                            <p class="text-slate-500 text-[10px] uppercase">${item.category}</p>
                         </div>
-                        <button onclick="deleteMenuItem('${id}')" class="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-all"><i class="fas fa-trash"></i></button>
-                    </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-            const list = document.getElementById('orderList');
-            list.innerHTML = '';
-            snap.forEach(d => {
-                const o = d.data();
-                if(o.status === "pending") {
-                    list.innerHTML += `
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center">
-                            <div>
-                                <h4 class="font-black text-white text-xl uppercase tracking-tighter">${o.userName}</h4>
-                                <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">${o.phone}</p>
-                                <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
-                                <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
-                            </div>
-                            <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl">ACCEPT</button>
-                        </div>`;
-                }
-            });
-        });
-
-       
-        window.addToCart = (name, price) => {
-            cart.push({ name, price });
-            renderCart();
-            if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
-        };
-
-        window.renderCart = () => {
-            const list = document.getElementById('cartList');
-            list.innerHTML = cart.map((item, i) => `
-                <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                    <div><span class="block text-white font-bold text-sm">${item.name}</span><span class="text-orange-500 font-black text-xs">₹${item.price}</span></div>
-                    <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
-                </div>`).join('');
-            document.getElementById('cartCount').innerText = cart.length;
-            updateTotals();
-        };
-
-        window.removeFromCart = (i) => { cart.splice(i, 1); renderCart(); };
-
-        window.updateTotals = () => {
-            const foodTotal = cart.reduce((s, i) => s + i.price, 0);
-            const total = foodTotal + (cart.length * parcelPrice);
-            document.getElementById('totalDisplay').innerText = `₹${total}`;
-        };
-
-        window.placeOrder = async () => {
-            if(!user) return openModal('user');
-            if(cart.length === 0) return alert("Your tray is empty!");
-            const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
-            await addDoc(collection(db, "orders"), {
-                userName: user.name, phone: user.phone, foodItems: cart.map(i => i.name),
-                bill: finalBill, status: "pending", createdAt: new Date()
-            });
-            alert("Order placed successfully! 🍕✨");
-            cart = []; renderCart(); toggleCart();
-        };
-
-        window.registerUser = async () => {
-            const name = document.getElementById('uName').value;
-            const phone = document.getElementById('uPhone').value;
-            const pass = document.getElementById('uPass').value;
-            if(!name || !phone || !pass) return alert("All fields are required!");
-            user = { name, phone };
-            await addDoc(collection(db, "users"), { ...user, pass });
-            localStorage.setItem('campusUser', JSON.stringify(user));
-            location.reload();
-        };
-
-         
-        window.toggleAdminView = (view) => {
-            document.getElementById('adminOrdersView').classList.toggle('hidden', view !== 'orders');
-            document.getElementById('adminMenuView').classList.toggle('hidden', view !== 'menu');
-        };
-
-        window.deleteMenuItem = async (id) => {
-            if(confirm("Remove this item?")) await deleteDoc(doc(db, "menu", id));
-        };
+                    </div>
+                    <button onclick="deleteMenuItem('${id}')" class="text-red-500 p-2"><i class="fas fa-trash"></i></button>
+                </div>`;
+        }
 
         window.dbAddMenuItem = async () => {
-    const nameInput = document.getElementById('mName');
-    const priceInput = document.getElementById('mPrice');
-    const imgInput = document.getElementById('mImg');
-
-    const name = nameInput.value;
-    const price = Number(priceInput.value);
-    const image = imgInput.value;
-
-    if(!name || !price) return alert("Need name and price!");
-
-    try {
-        await addDoc(collection(db, "menu"), { name, price, image });
-        alert("Added to Menu! 🍕");
+            const n = document.getElementById('mName'), p = document.getElementById('mPrice'), c = document.getElementById('mCategory'), i = document.getElementById('mImg');
+            if(!n.value || !p.value) return alert("Missing info");
+            await addDoc(collection(db, "menu"), { name: n.value, price: Number(p.value), category: c.value, image: i.value });
+            n.value = ''; p.value = ''; i.value = '';
+            alert("Added!");
+        };
+ 
+        window.signOutUser = () => { localStorage.removeItem('campusUser'); location.reload(); };
+        window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
         
-        
-        nameInput.value = ''; 
-        priceInput.value = ''; 
-        imgInput.value = '';  
-    } catch (e) {
-        alert("Error: " + e.message);
-    }
-};
-
-        window.dbSetParcel = async () => {
-            const p = Number(document.getElementById('pInput').value);
-            await setDoc(doc(db, "settings", "global"), { parcel: p });
-            alert("Updated!");
+        window.toggleAdminView = (v) => {
+            document.getElementById('adminOrdersView').classList.toggle('hidden', v !== 'orders');
+            document.getElementById('adminMenuView').classList.toggle('hidden', v !== 'menu');
         };
-
-        window.verifyAdmin = () => {
-            const id = document.getElementById('aID').value;
-            const pass = document.getElementById('aPass').value;
-            if(id === "havi" && pass === "1234567890") {
-                document.getElementById('adminDash').classList.remove('hidden');
-                closeModal();
-            } else alert("Access Denied");
-        };
-
-        window.confirmOrder = async (id, phone, bill) => {
-            await updateDoc(doc(db, "orders", id), { status: "accepted" });
-            alert(`Accepted bill of ₹${bill}`);
-        };
-
-        window.openModal = (type) => {
-            document.getElementById('masterModal').classList.add('modal-active');
-            document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
-            document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
-        };
+ 
+        window.addToCart = (n, p) => { cart.push({n, p}); updateTotals(); toggleCart(); };
+        window.updateTotals = () => { document.getElementById('totalDisplay').innerText = `₹${cart.reduce((s,i)=>s+i.p,0)}`; document.getElementById('cartCount').innerText = cart.length; };
+        window.openModal = (t) => { document.getElementById('masterModal').classList.add('modal-active'); document.getElementById('userFields').classList.toggle('hidden', t!=='user'); document.getElementById('adminFields').classList.toggle('hidden', t!=='admin'); };
         window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
         window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+        window.verifyAdmin = () => { if(document.getElementById('aID').value==="havi" && document.getElementById('aPass').value==="1234567890") { document.getElementById('adminDash').classList.remove('hidden'); closeModal(); } };
+        window.deleteMenuItem = async (id) => { if(confirm("Remove?")) await deleteDoc(doc(db, "menu", id)); };
     </script>
 </body>
 </html>
