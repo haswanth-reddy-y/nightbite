@@ -344,7 +344,26 @@
             } else alert("Invalid ID");
         };
 
-        window.confirmOrder = async (id, b) => { await updateDoc(doc(db, "orders", id), { status: "accepted" }); alert(`Order Accepted: ₹${b}`); };
+        window.confirmOrder = async (id, phone, bill, userName, items) => {
+    try {  
+        await updateDoc(doc(db, "orders", id), { status: "accepted" });
+ 
+        const message = `*THE NIGHT BITE - BILL CONFIRMED* 🍟%0A%0A` +
+                        `*Customer:* ${userName}%0A` +
+                        `*Order:* ${items}%0A` +
+                        `*Total Bill:* ₹${bill}%0A%0A` +
+                        `_Your order is being prepared. Please collect it in 15-20 mins!_`;
+ 
+        const waLink = `https://wa.me/91${phone}?text=${message}`;
+
+              alert(`Order Accepted! Sending bill to ${userName}...`);
+        window.open(waLink, '_blank'); 
+
+    } catch (e) {
+        console.error("Error confirming order:", e);
+        alert("Failed to accept order.");
+    }
+};
         window.deleteMenuItem = async (id) => { if(confirm("Delete item?")) await deleteDoc(doc(db, "menu", id)); };
         window.signOutUser = () => { localStorage.removeItem('campusUser'); location.reload(); };
         window.openModal = (t) => { document.getElementById('masterModal').classList.add('modal-active'); document.getElementById('userFields').classList.toggle('hidden', t!=='user'); document.getElementById('adminFields').classList.toggle('hidden', t!=='admin'); };
@@ -353,23 +372,33 @@
         window.toggleAdminView = (v) => { document.getElementById('adminOrdersView').classList.toggle('hidden', v !== 'orders'); document.getElementById('adminMenuView').classList.toggle('hidden', v !== 'menu'); };
         window.addEventListener('keydown', (e) => { if (e.key === "Escape") { closeModal(); if(!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart(); } });
  
-        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-            const list = document.getElementById('orderList');
-            if(!list) return;
-            list.innerHTML = '';
-            snap.forEach(d => {
-                const o = d.data();
-                if(o.status === "pending") {
-                    list.innerHTML += `
-                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center mb-4">
-                            <div>
-                                <h4 class="font-black text-white text-xl uppercase">${o.userName}</h4>
-                                <p class="text-slate-500 font-bold text-xs uppercase">${o.phone}</p>
-                                <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
-                                <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
-                            </div>
-                            <button onclick="confirmOrder('${d.id}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl">ACCEPT</button>
-                        </div>`;
+        
+onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+    const list = document.getElementById('orderList');
+    if(!list) return;
+    list.innerHTML = '';
+    snap.forEach(d => {
+        const o = d.data();
+        if(o.status === "pending") {
+     
+            const itemsString = o.foodItems.join(', ');
+            
+            list.innerHTML += `
+                <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center mb-4">
+                    <div>
+                        <h4 class="font-black text-white text-xl uppercase">${o.userName}</h4>
+                        <p class="text-slate-500 font-bold text-xs uppercase">${o.phone}</p>
+                        <p class="text-slate-300 text-sm mt-3 font-semibold">${itemsString}</p>
+                        <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
+                    </div>
+                    <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill}, '${o.userName}', '${itemsString}')" 
+                            class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl">
+                        ACCEPT & BILL
+                    </button>
+                </div>`;
+        }
+    });
+});
                 }
             });
         });
