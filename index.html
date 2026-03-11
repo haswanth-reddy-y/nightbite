@@ -58,151 +58,79 @@
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 py-10">
-        <div class="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
-            <div class="animate-float">
-                <h2 class="text-5xl font-black text-white mb-3 tracking-tight">Midnight <span class="text-orange-500">Fuel.</span> 🍔</h2>
-                <p class="text-slate-400 text-lg">Your hostel wing's favorite late-night kitchen.</p>
-            </div>
-            <div class="bg-slate-900/80 border border-slate-800 p-3 rounded-2xl flex items-center gap-4 shadow-2xl">
-                <div class="flex h-4 w-4 rounded-full bg-green-500 animate-pulse"></div>
-                <div>
-                    <span class="text-xs uppercase font-bold text-slate-500 block">Status</span>
-                    <span class="text-sm font-bold text-green-400">Taking Live Orders</span>
-                </div>
-            </div>
-        </div>
-        
-        <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div class="col-span-full text-center py-24">
-                <i class="fas fa-spinner animate-spin text-5xl text-orange-500 mb-6"></i>
-                <p class="text-slate-500 tracking-widest uppercase font-bold text-xs">Curating Your Cravings...</p>
-            </div>
-        </div>
-    </main>
-
-    <div id="cartSidebar" class="fixed inset-y-0 right-0 w-full max-w-sm bg-[#0f172a] shadow-[0_0_50px_rgba(0,0,0,0.8)] translate-x-full transition-transform duration-500 z-[100] flex flex-col border-l border-slate-800">
-        <div class="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900/50">
-            <h2 class="text-xl font-black uppercase tracking-tighter text-white">Your Tray</h2>
-            <button onclick="toggleCart()" class="text-slate-500 hover:text-white transition text-3xl">&times;</button>
-        </div>
-        <div id="cartList" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
-        <div class="p-8 border-t border-slate-800 bg-[#020617] space-y-4">
-            <div class="flex justify-between text-slate-500 font-bold uppercase text-[10px] tracking-widest">
-                <span>Individual Parcel Fee</span>
-                <span id="parcelDisplay" class="text-orange-500 font-black">₹0</span>
-            </div>
-            <div class="flex justify-between items-end pb-4">
-                <span class="text-slate-400 text-sm font-bold">Total Payable</span>
-                <span id="totalDisplay" class="text-4xl font-black text-white">₹0</span>
-            </div>
-            <button onclick="placeOrder()" class="w-full bg-orange-600 hover:bg-orange-500 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-orange-900/20 transition-all uppercase tracking-widest">Blast Order 🚀</button>
-        </div>
-    </div>
-
-    <div id="masterModal" class="fixed inset-0 bg-[#020617]/95 z-[200] hidden items-center justify-center p-4 backdrop-blur-md">
-        <div class="bg-[#0f172a] rounded-[2.5rem] p-10 w-full max-w-md relative border border-slate-800 shadow-2xl">
-            <button onclick="closeModal()" class="absolute top-8 right-8 text-slate-500 hover:text-white text-2xl">&times;</button>
-            
-            <div id="userFields" class="hidden">
-                <h3 class="text-3xl font-black mb-2 text-white">Student Sign-In</h3>
-                <p class="text-slate-500 mb-8 text-sm">Join the "The Night Bite" community.</p>
-                <input type="text" id="uName" placeholder="Full Name" class="w-full bg-slate-900/50 border border-slate-800 p-4 mb-3 rounded-2xl text-white outline-none focus:border-orange-500 transition-all">
-                <input type="tel" id="uPhone" placeholder="Mobile Number" class="w-full bg-slate-900/50 border border-slate-800 p-4 mb-3 rounded-2xl text-white outline-none focus:border-orange-500 transition-all">
-                <input type="password" id="uPass" placeholder="Secret Password" class="w-full bg-slate-900/50 border border-slate-800 p-4 mb-8 rounded-2xl text-white outline-none focus:border-orange-500 transition-all">
-                <button onclick="registerUser()" class="w-full bg-white text-slate-900 py-4 rounded-2xl font-black text-lg hover:bg-orange-500 hover:text-white transition-all">Enter Kitchen</button>
-            </div>
-
-            <div id="adminFields" class="hidden text-center">
-                <div class="inline-block p-5 bg-orange-500/10 rounded-full mb-6">
-                    <i class="fas fa-lock text-3xl text-orange-500"></i>
-                </div>
-                <h3 class="text-2xl font-black text-white uppercase tracking-tighter mb-8">Admin Authorization</h3>
-                <input type="text" id="aID" placeholder="Admin ID" class="w-full bg-slate-900 p-4 mb-3 rounded-2xl text-white outline-none border border-slate-800">
-                <input type="password" id="aPass" placeholder="Password" class="w-full bg-slate-900 p-4 mb-8 rounded-2xl text-white outline-none border border-slate-800">
-                <button onclick="verifyAdmin()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest hover:bg-orange-500 transition-all">Login</button>
-            </div>
-        </div>
-    </div>
-
     <div id="adminDash" class="fixed inset-0 bg-[#020617] z-[300] hidden overflow-y-auto p-8">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex justify-between items-center mb-12 border-b border-slate-800 pb-8">
-                <h2 class="text-3xl font-black tracking-tighter">ADMIN <span class="text-orange-500">CONSOLE</span></h2>
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-12 border-b border-slate-800 pb-8">
+            <h2 class="text-3xl font-black tracking-tighter">ADMIN <span class="text-orange-500">CONSOLE</span></h2>
+            <div class="flex gap-4">
+                <button onclick="toggleAdminView('orders')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all">Orders</button>
+                <button onclick="toggleAdminView('menu')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all">Menu Manager</button>
                 <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-8 py-3 rounded-2xl font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">Logout</button>
             </div>
+        </div>
 
-            <div class="grid lg:grid-cols-3 gap-12">
-                <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
-                    <h4 class="font-black mb-8 uppercase text-xs tracking-widest text-slate-500">Add New Dish</h4>
-                    <input type="text" id="mName" placeholder="Item Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
-                    <input type="number" id="mPrice" placeholder="Price (₹)" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
-                    <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white">
-                    <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-orange-900/40">Add to Menu</button>
-                    
-                    <div class="pt-10 mt-10 border-t border-slate-800">
-                        <h4 class="font-black mb-4 text-xs text-slate-500 uppercase">Packing Charge / Item</h4>
-                        <div class="flex gap-4">
-                            <input type="number" id="pInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white" placeholder="₹">
-                            <button onclick="dbSetParcel()" class="bg-white text-slate-900 px-6 rounded-xl font-bold uppercase text-xs">Update</button>
-                        </div>
-                    </div>
+        <div id="adminOrdersView" class="grid lg:grid-cols-3 gap-12">
+            <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
+                <h4 class="font-black mb-4 text-xs text-slate-500 uppercase">Packing Charge / Item</h4>
+                <div class="flex gap-4">
+                    <input type="number" id="pInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white" placeholder="₹">
+                    <button onclick="dbSetParcel()" class="bg-white text-slate-900 px-6 rounded-xl font-bold uppercase text-xs">Update</button>
                 </div>
+            </div>
+            <div class="lg:col-span-2">
+                <h3 class="text-2xl font-black mb-8 flex items-center gap-3">Incoming Orders <span class="h-2 w-2 rounded-full bg-orange-500"></span></h3>
+                <div id="orderList" class="space-y-4"></div>
+            </div>
+        </div>
 
-                <div class="lg:col-span-2">
-                    <h3 class="text-2xl font-black mb-8 flex items-center gap-3">Incoming Orders <span class="h-2 w-2 rounded-full bg-orange-500"></span></h3>
-                    <div id="orderList" class="space-y-4"></div>
-                </div>
+        <div id="adminMenuView" class="hidden grid lg:grid-cols-3 gap-12">
+            <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
+                <h4 class="font-black mb-8 uppercase text-xs tracking-widest text-slate-500">Add New Dish</h4>
+                <input type="text" id="mName" placeholder="Item Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
+                <input type="number" id="mPrice" placeholder="Price (₹)" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
+                <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white">
+                <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest">Add to Menu</button>
+            </div>
+            <div class="lg:col-span-2">
+                <h3 class="text-2xl font-black mb-8">Live Menu Items</h3>
+                <div id="adminMenuList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
     </div>
+</div>
 
-    
-
-    <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
-        getFirestore, 
-        collection, 
-        addDoc, 
-        onSnapshot, 
-        doc, 
-        updateDoc, 
-        setDoc, 
-        query, 
-        orderBy 
+        getFirestore, collection, addDoc, onSnapshot, doc, 
+        updateDoc, setDoc, query, orderBy, deleteDoc 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 1. Corrected Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
         authDomain: "nighthunger-e55e1.firebaseapp.com",
         projectId: "nighthunger-e55e1",
         storageBucket: "nighthunger-e55e1.firebasestorage.app",
         messagingSenderId: "129732701448",
-        appId: "1:129732701448:web:eb136b05c3e20414c590bd",
-        measurementId: "G-F3RLH8HB4J"
+        appId: "1:129732701448:web:eb136b05c3e20414c590bd"
     };
 
-    // 2. Initialize Firebase and Firestore
-    let app, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        console.log("Firebase Connected Successfully! 🔥");
-    } catch (error) {
-        console.error("Firebase Initialization Error:", error);
-        alert("Database connection failed. Check your API key.");
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // --- Application Logic ---
     let cart = [];
     let parcelPrice = 0;
     let user = JSON.parse(localStorage.getItem('campusUser')) || null;
+ 
+    window.addEventListener('keydown', (e) => {
+        if (e.key === "Escape") {
+            closeModal();
+            const sidebar = document.getElementById('cartSidebar');
+            if (!sidebar.classList.contains('translate-x-full')) toggleCart();
+        }
+    });
 
-    if(user) document.getElementById('userStatus').innerText = `Yo, ${user.name.split(' ')[0]}!`;
-
-    // Listen for global settings (Parcel Fee)
+     
     onSnapshot(doc(db, "settings", "global"), (snap) => {
         if(snap.exists()) {
             parcelPrice = snap.data().parcel || 0;
@@ -211,163 +139,76 @@
         }
     });
 
-    // Listen for Menu Updates
     onSnapshot(collection(db, "menu"), (snap) => {
         const grid = document.getElementById('menuGrid');
+        const adminGrid = document.getElementById('adminMenuList');
         grid.innerHTML = '';
+        adminGrid.innerHTML = '';
+
         snap.forEach(d => {
             const item = d.data();
+            const id = d.id;
+
+           
             grid.innerHTML += `
-                <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500 relative">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="${item.image}" class="h-full w-full object-cover group-hover:scale-110 transition duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#020617] to-transparent"></div>
-                    </div>
-                    <div class="p-8 relative">
-                        <h3 class="font-bold text-white text-xl mb-2">${item.name}</h3>
-                        <div class="flex justify-between items-center mt-6">
-                            <span class="text-3xl font-black text-white">₹${item.price}</span>
-                            <div class="tooltip-container">
-                                <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center btn-glow transition-all">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <span class="tooltip-popup">Add to Tray</span>
-                            </div>
+                <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500">
+                    <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover"></div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-white text-lg">${item.name}</h3>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-2xl font-black">₹${item.price}</span>
+                            <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 p-3 rounded-xl"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                 </div>`;
-        });
-    });
 
-    // Listen for Incoming Orders (Admin side)
-    onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-        const list = document.getElementById('orderList');
-        if(!list) return; // Guard for non-admin view
-        list.innerHTML = '';
-        snap.forEach(d => {
-            const o = d.data();
-            if(o.status === "pending") {
-                list.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center">
+             
+            adminGrid.innerHTML += `
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
                         <div>
-                            <h4 class="font-black text-white text-xl uppercase tracking-tighter">${o.userName}</h4>
-                            <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">${o.phone}</p>
-                            <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
-                            <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
+                            <p class="text-white font-bold">${item.name}</p>
+                            <p class="text-orange-500 text-xs">₹${item.price}</p>
                         </div>
-                        <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl shadow-green-900/30">ACCEPT ORDER</button>
-                    </div>`;
-            }
+                    </div>
+                    <button onclick="deleteMenuItem('${id}')" class="text-red-500 hover:bg-red-500/10 p-3 rounded-xl transition">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>`;
         });
     });
-
-    // Expose functions to global window scope for HTML onclick events
-    window.openModal = (type) => {
-        document.getElementById('masterModal').classList.add('modal-active');
-        document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
-        document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
+ 
+    window.toggleAdminView = (view) => {
+        document.getElementById('adminOrdersView').classList.toggle('hidden', view !== 'orders');
+        document.getElementById('adminMenuView').classList.toggle('hidden', view !== 'menu');
     };
 
-    window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
-    
-    window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
-
-    window.addToCart = (name, price) => {
-        cart.push({ name, price });
-        renderCart();
-        if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
-    };
-
-    window.renderCart = () => {
-        const list = document.getElementById('cartList');
-        list.innerHTML = cart.map((item, i) => `
-            <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                <div>
-                    <span class="block text-white font-bold text-sm">${item.name}</span>
-                    <span class="text-orange-500 font-black text-xs">₹${item.price}</span>
-                </div>
-                <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
-            </div>`).join('');
-        document.getElementById('cartCount').innerText = cart.length;
-        updateTotals();
-    };
-
-    window.removeFromCart = (i) => {
-        cart.splice(i, 1);
-        renderCart();
-    };
-
-    window.updateTotals = () => {
-        const foodTotal = cart.reduce((s, i) => s + i.price, 0);
-        const total = foodTotal + (cart.length * parcelPrice);
-        document.getElementById('totalDisplay').innerText = `₹${total}`;
-    };
-
-    window.registerUser = async () => {
-        const name = document.getElementById('uName').value;
-        const phone = document.getElementById('uPhone').value;
-        const pass = document.getElementById('uPass').value;
-        if(!name || !phone || !pass) return alert("All fields are required!");
-        user = { name, phone };
-        try {
-            await addDoc(collection(db, "users"), { ...user, pass });
-            localStorage.setItem('campusUser', JSON.stringify(user));
-            location.reload();
-        } catch (e) { alert("Error registering user: " + e.message); }
-    };
-
-    window.placeOrder = async () => {
-        if(!user) return openModal('user');
-        if(cart.length === 0) return alert("Your tray is empty!");
-        const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
-        try {
-            await addDoc(collection(db, "orders"), {
-                userName: user.name,
-                phone: user.phone,
-                foodItems: cart.map(i => i.name),
-                bill: finalBill,
-                status: "pending",
-                createdAt: new Date()
-            });
-            alert("Order placed successfully! 🍕✨");
-            cart = []; renderCart(); toggleCart();
-        } catch (e) { alert("Order failed: " + e.message); }
-    };
-
-    window.verifyAdmin = () => {
-        const id = document.getElementById('aID').value;
-        const pass = document.getElementById('aPass').value;
-        // Tip: For production, use Firebase Auth instead of hardcoded creds!
-        if(id === "havi" && pass === "1234567890") {
-            document.getElementById('adminDash').classList.remove('hidden');
-            closeModal();
-        } else alert("Invalid Admin ID or Password");
+    window.deleteMenuItem = async (id) => {
+        if(confirm("Remove this item from the menu?")) {
+            await deleteDoc(doc(db, "menu", id));
+        }
     };
 
     window.dbAddMenuItem = async () => {
         const name = document.getElementById('mName').value;
         const price = Number(document.getElementById('mPrice').value);
         const image = document.getElementById('mImg').value;
-        if(!name || !price) return alert("Item details missing!");
+        if(!name || !price) return alert("Fill required fields!");
         await addDoc(collection(db, "menu"), { name, price, image });
-        alert("New item added to menu!");
-        document.getElementById('mName').value = ''; 
-        document.getElementById('mPrice').value = ''; 
-        document.getElementById('mImg').value = '';
+        alert("Added!");
+        document.getElementById('mName').value = ''; document.getElementById('mPrice').value = '';
     };
-
-    window.dbSetParcel = async () => {
-        const p = Number(document.getElementById('pInput').value);
-        await setDoc(doc(db, "settings", "global"), { parcel: p });
-        alert("Global settings updated!");
+ 
+    window.openModal = (type) => {
+        document.getElementById('masterModal').classList.add('modal-active');
+        document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
+        document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
     };
-
-    window.confirmOrder = async (id, phone, bill) => {
-        try {
-            await updateDoc(doc(db, "orders", id), { status: "accepted" });
-            alert(`ORDER CONFIRMED: Bill of ₹${bill} for ${phone}`);
-        } catch (e) { alert("Error: " + e.message); }
-    };
+    window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
+    window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+    
+     
 </script>
 </body>
 </html>
