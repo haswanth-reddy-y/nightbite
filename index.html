@@ -327,13 +327,28 @@
         };
 
         window.dbAddMenuItem = async () => {
-            const name = document.getElementById('mName').value;
-            const price = Number(document.getElementById('mPrice').value);
-            const image = document.getElementById('mImg').value;
-            if(!name || !price) return alert("Need name and price!");
-            await addDoc(collection(db, "menu"), { name, price, image });
-            document.getElementById('mName').value = ''; document.getElementById('mPrice').value = '';
-        };
+    const nameInput = document.getElementById('mName');
+    const priceInput = document.getElementById('mPrice');
+    const imgInput = document.getElementById('mImg');
+
+    const name = nameInput.value;
+    const price = Number(priceInput.value);
+    const image = imgInput.value;
+
+    if(!name || !price) return alert("Need name and price!");
+
+    try {
+        await addDoc(collection(db, "menu"), { name, price, image });
+        alert("Added to Menu! 🍕");
+        
+        
+        nameInput.value = ''; 
+        priceInput.value = ''; 
+        imgInput.value = '';  
+    } catch (e) {
+        alert("Error: " + e.message);
+    }
+};
 
         window.dbSetParcel = async () => {
             const p = Number(document.getElementById('pInput').value);
