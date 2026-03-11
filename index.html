@@ -305,7 +305,18 @@
             alert("Added!");
         };
 
-        window.addToCart = (n, p) => { cart.push({n, p}); updateTotals(); if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart(); };
+        window.addToCart = (n, p) => { 
+    cart.push({n, p}); 
+    updateTotals(); 
+  
+    if (window.innerWidth > 768) {
+        if (document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
+            toggleCart();
+        }
+    } else {
+        console.log("Added to tray");
+    }
+};
         window.updateTotals = () => {
             const foodTotal = cart.reduce((s,i)=>s+i.p,0);
             const total = foodTotal + (cart.length * globalParcelPrice);
@@ -325,14 +336,30 @@
 
         window.removeFromCart = (i) => { cart.splice(i, 1); updateTotals(); };
 
-        window.placeOrder = async () => {
-            if(!user) return openModal('user');
-            if(cart.length === 0) return alert("Tray is empty!");
-            const finalBill = cart.reduce((s,i)=>s+i.p,0) + (cart.length * globalParcelPrice);
-            await addDoc(collection(db, "orders"), { userName: user.name, phone: user.phone, foodItems: cart.map(i => i.n), bill: finalBill, status: "pending", createdAt: new Date() });
-            alert("Order Blasted! 🚀 Check with staff in 15 mins.");
-            cart = []; updateTotals(); toggleCart();
-        };
+       window.placeOrder = async () => {
+    if(!user) return openModal('user');
+    if(cart.length === 0) return alert("Tray is empty!");
+    
+    const finalBill = cart.reduce((s,i)=>s+i.p,0) + (cart.length * globalParcelPrice);
+    
+    await addDoc(collection(db, "orders"), { 
+        userName: user.name, 
+        phone: user.phone, 
+        foodItems: cart.map(i => i.n), 
+        bill: finalBill, 
+        status: "pending", 
+        createdAt: new Date() 
+    });
+    if (Notification.permission === "granted") {
+        new Notification("Order Blasted! 🚀", {
+            body: "The kitchen has received your order. Check back in 15 mins.",
+            icon: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" // Burger icon
+        });
+    }
+
+    alert("Order Blasted! 🚀");
+    cart = []; updateTotals(); toggleCart();
+};
 
         window.registerUser = async () => {
             const n = document.getElementById('uName'), ph = document.getElementById('uPhone'), ps = document.getElementById('uPass');
@@ -377,7 +404,7 @@
         window.toggleAdminView = (v) => { document.getElementById('adminOrdersView').classList.toggle('hidden', v !== 'orders'); document.getElementById('adminMenuView').classList.toggle('hidden', v !== 'menu'); };
         window.addEventListener('keydown', (e) => { if (e.key === "Escape") { closeModal(); if(!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart(); } });
  
-       // ORDER LISTENER (Admin Side)
+      
 onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
     const list = document.getElementById('orderList');
     if(!list) return;
@@ -385,7 +412,7 @@ onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap)
     snap.forEach(d => {
         const o = d.data();
         if(o.status === "pending") {
-            // Join items into a string for the WhatsApp message
+         
             const itemsString = o.foodItems.join(', ');
             
             list.innerHTML += `
