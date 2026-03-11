@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,13 +10,10 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .modal-active { display: flex !important; }
-         
         .glass-nav { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.08); }
         .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); }
-         
         .gradient-text { background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .btn-glow:hover { box-shadow: 0 0 20px rgba(249, 115, 22, 0.4); transform: translateY(-2px); }
-     
         .tooltip-container { position: relative; }
         .tooltip-popup {
             position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%) scale(0.8);
@@ -26,7 +23,6 @@
             border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5);
         }
         .tooltip-container:hover .tooltip-popup { opacity: 1; transform: translateX(-50%) scale(1); }
-   
         @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
         .animate-float { animation: float 3s ease-in-out infinite; }
     </style>
@@ -38,23 +34,19 @@
             THE <span class="gradient-text">NIGHT BITE</span>
         </h1>
         <div class="flex items-center gap-5">
-            <div class="tooltip-container hidden md:block">
-                <button onclick="openModal('admin')" class="text-[10px] tracking-widest uppercase font-bold text-slate-500 hover:text-orange-400 transition-colors">Staff Access</button>
-                <span class="tooltip-popup">Admin Dashboard</span>
-            </div>
+            <button onclick="openModal('admin')" class="text-[10px] tracking-widest uppercase font-bold text-slate-500 hover:text-orange-400 transition-colors hidden md:block">Staff Access</button>
 
-            <div class="tooltip-container">
-                <button id="userStatus" onclick="openModal('user')" class="bg-slate-800/80 text-white px-5 py-2 rounded-xl font-semibold border border-slate-700 hover:border-orange-500/50 transition-all duration-300">Sign In</button>
-                <span class="tooltip-popup">Unlock Perks 🔓</span>
-            </div>
-
-            <div class="tooltip-container">
-                <button onclick="toggleCart()" class="relative bg-orange-600 p-2.5 rounded-xl btn-glow transition-all">
-                    <i class="fas fa-shopping-basket text-xl text-white"></i>
-                    <span id="cartCount" class="absolute -top-2 -right-2 bg-white text-orange-600 text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center shadow-lg border-2 border-orange-600">0</span>
+            <div class="flex items-center gap-2">
+                <button id="userStatus" onclick="openModal('user')" class="bg-slate-800/80 text-white px-5 py-2 rounded-xl font-semibold border border-slate-700 hover:border-orange-500/50 transition-all">Sign In</button>
+                <button id="signOutBtn" onclick="signOutUser()" class="hidden bg-red-500/10 text-red-500 p-2.5 rounded-xl border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">
+                    <i class="fas fa-sign-out-alt"></i>
                 </button>
-                <span class="tooltip-popup">View Tray</span>
             </div>
+
+            <button onclick="toggleCart()" class="relative bg-orange-600 p-2.5 rounded-xl btn-glow transition-all">
+                <i class="fas fa-shopping-basket text-xl text-white"></i>
+                <span id="cartCount" class="absolute -top-2 -right-2 bg-white text-orange-600 text-[10px] font-black rounded-full h-5 w-5 flex items-center justify-center border-2 border-orange-600">0</span>
+            </button>
         </div>
     </nav>
 
@@ -89,14 +81,14 @@
         <div id="cartList" class="flex-grow overflow-y-auto p-6 space-y-4"></div>
         <div class="p-8 border-t border-slate-800 bg-[#020617] space-y-4">
             <div class="flex justify-between text-slate-500 font-bold uppercase text-[10px] tracking-widest">
-                <span>Individual Parcel Fee</span>
+                <span>Parcel Fee (per item)</span>
                 <span id="parcelDisplay" class="text-orange-500 font-black">₹0</span>
             </div>
             <div class="flex justify-between items-end pb-4">
                 <span class="text-slate-400 text-sm font-bold">Total Payable</span>
                 <span id="totalDisplay" class="text-4xl font-black text-white">₹0</span>
             </div>
-            <button onclick="placeOrder()" class="w-full bg-orange-600 hover:bg-orange-500 text-white py-5 rounded-2xl font-black text-lg shadow-xl shadow-orange-900/20 transition-all uppercase tracking-widest">Blast Order 🚀</button>
+            <button onclick="placeOrder()" class="w-full bg-orange-600 hover:bg-orange-500 text-white py-5 rounded-2xl font-black text-lg shadow-xl transition-all uppercase tracking-widest">Blast Order 🚀</button>
         </div>
     </div>
 
@@ -129,245 +121,247 @@
         <div class="max-w-6xl mx-auto">
             <div class="flex justify-between items-center mb-12 border-b border-slate-800 pb-8">
                 <h2 class="text-3xl font-black tracking-tighter">ADMIN <span class="text-orange-500">CONSOLE</span></h2>
-                <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-8 py-3 rounded-2xl font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">Logout</button>
+                <div class="flex gap-4">
+                    <button onclick="toggleAdminView('orders')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all">Orders</button>
+                    <button onclick="toggleAdminView('menu')" class="bg-slate-800 text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-all">Manage Menu</button>
+                    <button onclick="location.reload()" class="bg-red-500/10 text-red-500 px-8 py-3 rounded-2xl font-bold border border-red-500/20 hover:bg-red-500 hover:text-white transition-all">Logout</button>
+                </div>
             </div>
 
-            <div class="grid lg:grid-cols-3 gap-12">
+            <div id="adminOrdersView" class="grid lg:grid-cols-3 gap-12">
+                <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
+                    <h4 class="font-black mb-4 text-xs text-slate-500 uppercase tracking-widest">Global Packing Charge</h4>
+                    <div class="flex gap-4">
+                        <input type="number" id="pInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white" placeholder="₹">
+                        <button onclick="dbSetParcel()" class="bg-white text-slate-900 px-6 rounded-xl font-bold uppercase text-xs">Set</button>
+                    </div>
+                </div>
+                <div class="lg:col-span-2">
+                    <h3 class="text-2xl font-black mb-8 flex items-center gap-3">Incoming Orders <span class="h-2 w-2 rounded-full bg-orange-500 animate-pulse"></span></h3>
+                    <div id="orderList" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <div id="adminMenuView" class="hidden grid lg:grid-cols-3 gap-12">
                 <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit">
                     <h4 class="font-black mb-8 uppercase text-xs tracking-widest text-slate-500">Add New Dish</h4>
                     <input type="text" id="mName" placeholder="Item Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
                     <input type="number" id="mPrice" placeholder="Price (₹)" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white">
                     <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white">
-                    <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest shadow-lg shadow-orange-900/40">Add to Menu</button>
-                    
-                    <div class="pt-10 mt-10 border-t border-slate-800">
-                        <h4 class="font-black mb-4 text-xs text-slate-500 uppercase">Packing Charge / Item</h4>
-                        <div class="flex gap-4">
-                            <input type="number" id="pInput" class="w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white" placeholder="₹">
-                            <button onclick="dbSetParcel()" class="bg-white text-slate-900 px-6 rounded-xl font-bold uppercase text-xs">Update</button>
-                        </div>
-                    </div>
+                    <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest">Add to Menu</button>
                 </div>
-
                 <div class="lg:col-span-2">
-                    <h3 class="text-2xl font-black mb-8 flex items-center gap-3">Incoming Orders <span class="h-2 w-2 rounded-full bg-orange-500"></span></h3>
-                    <div id="orderList" class="space-y-4"></div>
+                    <h3 class="text-2xl font-black mb-8">Live Menu (Click trash to delete)</h3>
+                    <div id="adminMenuList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    
-
     <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-        getFirestore, 
-        collection, 
-        addDoc, 
-        onSnapshot, 
-        doc, 
-        updateDoc, 
-        setDoc, 
-        query, 
-        orderBy 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, setDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    // 1. Corrected Firebase Configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
-        authDomain: "nighthunger-e55e1.firebaseapp.com",
-        projectId: "nighthunger-e55e1",
-        storageBucket: "nighthunger-e55e1.firebasestorage.app",
-        messagingSenderId: "129732701448",
-        appId: "1:129732701448:web:eb136b05c3e20414c590bd",
-        measurementId: "G-F3RLH8HB4J"
-    };
+        const firebaseConfig = {
+            apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
+            authDomain: "nighthunger-e55e1.firebaseapp.com",
+            projectId: "nighthunger-e55e1",
+            storageBucket: "nighthunger-e55e1.firebasestorage.app",
+            messagingSenderId: "129732701448",
+            appId: "1:129732701448:web:eb136b05c3e20414c590bd"
+        };
 
-    // 2. Initialize Firebase and Firestore
-    let app, db;
-    try {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-        console.log("Firebase Connected Successfully! 🔥");
-    } catch (error) {
-        console.error("Firebase Initialization Error:", error);
-        alert("Database connection failed. Check your API key.");
-    }
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    // --- Application Logic ---
-    let cart = [];
-    let parcelPrice = 0;
-    let user = JSON.parse(localStorage.getItem('campusUser')) || null;
-
-    if(user) document.getElementById('userStatus').innerText = `Yo, ${user.name.split(' ')[0]}!`;
-
-    // Listen for global settings (Parcel Fee)
-    onSnapshot(doc(db, "settings", "global"), (snap) => {
-        if(snap.exists()) {
-            parcelPrice = snap.data().parcel || 0;
-            document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
-            updateTotals();
-        }
-    });
-
-    // Listen for Menu Updates
-    onSnapshot(collection(db, "menu"), (snap) => {
-        const grid = document.getElementById('menuGrid');
-        grid.innerHTML = '';
-        snap.forEach(d => {
-            const item = d.data();
-            grid.innerHTML += `
-                <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500 relative">
-                    <div class="relative h-56 overflow-hidden">
-                        <img src="${item.image}" class="h-full w-full object-cover group-hover:scale-110 transition duration-700">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#020617] to-transparent"></div>
-                    </div>
-                    <div class="p-8 relative">
-                        <h3 class="font-bold text-white text-xl mb-2">${item.name}</h3>
-                        <div class="flex justify-between items-center mt-6">
-                            <span class="text-3xl font-black text-white">₹${item.price}</span>
-                            <div class="tooltip-container">
-                                <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center btn-glow transition-all">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <span class="tooltip-popup">Add to Tray</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>`;
-        });
-    });
-
-    // Listen for Incoming Orders (Admin side)
-    onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-        const list = document.getElementById('orderList');
-        if(!list) return; // Guard for non-admin view
-        list.innerHTML = '';
-        snap.forEach(d => {
-            const o = d.data();
-            if(o.status === "pending") {
-                list.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center">
-                        <div>
-                            <h4 class="font-black text-white text-xl uppercase tracking-tighter">${o.userName}</h4>
-                            <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">${o.phone}</p>
-                            <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
-                            <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
-                        </div>
-                        <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl shadow-green-900/30">ACCEPT ORDER</button>
-                    </div>`;
+        let cart = [];
+        let parcelPrice = 0;
+        let user = JSON.parse(localStorage.getItem('campusUser')) || null;
+ 
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Escape") {
+                closeModal();
+                if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
             }
         });
-    });
+ 
+        const updateUIForUser = () => {
+            const statusBtn = document.getElementById('userStatus');
+            const logoutBtn = document.getElementById('signOutBtn');
+            if (user) {
+                statusBtn.innerText = `Hi, ${user.name.split(' ')[0]}`;
+                statusBtn.onclick = null;
+                logoutBtn.classList.remove('hidden');
+            } else {
+                statusBtn.innerText = "Sign In";
+                statusBtn.onclick = () => openModal('user');
+                logoutBtn.classList.add('hidden');
+            }
+        };
+        updateUIForUser();
 
-    // Expose functions to global window scope for HTML onclick events
-    window.openModal = (type) => {
-        document.getElementById('masterModal').classList.add('modal-active');
-        document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
-        document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
-    };
+        window.signOutUser = () => {
+            if(confirm("Ready to sign out?")) {
+                localStorage.removeItem('campusUser');
+                location.reload();
+            }
+        };
+ 
+        onSnapshot(doc(db, "settings", "global"), (snap) => {
+            if(snap.exists()) {
+                parcelPrice = snap.data().parcel || 0;
+                document.getElementById('parcelDisplay').innerText = `₹${parcelPrice}`;
+                updateTotals();
+            }
+        });
 
-    window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
-    
-    window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+        onSnapshot(collection(db, "menu"), (snap) => {
+            const grid = document.getElementById('menuGrid');
+            const adminList = document.getElementById('adminMenuList');
+            grid.innerHTML = '';
+            adminList.innerHTML = '';
+            snap.forEach(d => {
+                const item = d.data();
+                const id = d.id;
+                
+                grid.innerHTML += `
+                    <div class="glass-card rounded-[2.5rem] overflow-hidden group hover:border-orange-500/50 transition-all duration-500">
+                        <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover"></div>
+                        <div class="p-8">
+                            <h3 class="font-bold text-white text-xl mb-2">${item.name}</h3>
+                            <div class="flex justify-between items-center mt-6">
+                                <span class="text-3xl font-black text-white">₹${item.price}</span>
+                                <button onclick="addToCart('${item.name}', ${item.price})" class="bg-orange-600 text-white h-12 w-12 rounded-2xl flex items-center justify-center btn-glow"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>`;
 
-    window.addToCart = (name, price) => {
-        cart.push({ name, price });
-        renderCart();
-        if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
-    };
+                adminList.innerHTML += `
+                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
+                        <div class="flex items-center gap-4">
+                            <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
+                            <span class="text-white font-bold">${item.name} (₹${item.price})</span>
+                        </div>
+                        <button onclick="deleteMenuItem('${id}')" class="text-red-500 hover:bg-red-500/10 p-2 rounded-lg transition-all"><i class="fas fa-trash"></i></button>
+                    </div>`;
+            });
+        });
 
-    window.renderCart = () => {
-        const list = document.getElementById('cartList');
-        list.innerHTML = cart.map((item, i) => `
-            <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                <div>
-                    <span class="block text-white font-bold text-sm">${item.name}</span>
-                    <span class="text-orange-500 font-black text-xs">₹${item.price}</span>
-                </div>
-                <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
-            </div>`).join('');
-        document.getElementById('cartCount').innerText = cart.length;
-        updateTotals();
-    };
+        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+            const list = document.getElementById('orderList');
+            list.innerHTML = '';
+            snap.forEach(d => {
+                const o = d.data();
+                if(o.status === "pending") {
+                    list.innerHTML += `
+                        <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center">
+                            <div>
+                                <h4 class="font-black text-white text-xl uppercase tracking-tighter">${o.userName}</h4>
+                                <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">${o.phone}</p>
+                                <p class="text-slate-300 text-sm mt-3 font-semibold">${o.foodItems.join(' + ')}</p>
+                                <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
+                            </div>
+                            <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill})" class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl">ACCEPT</button>
+                        </div>`;
+                }
+            });
+        });
 
-    window.removeFromCart = (i) => {
-        cart.splice(i, 1);
-        renderCart();
-    };
+       
+        window.addToCart = (name, price) => {
+            cart.push({ name, price });
+            renderCart();
+            if(document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
+        };
 
-    window.updateTotals = () => {
-        const foodTotal = cart.reduce((s, i) => s + i.price, 0);
-        const total = foodTotal + (cart.length * parcelPrice);
-        document.getElementById('totalDisplay').innerText = `₹${total}`;
-    };
+        window.renderCart = () => {
+            const list = document.getElementById('cartList');
+            list.innerHTML = cart.map((item, i) => `
+                <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
+                    <div><span class="block text-white font-bold text-sm">${item.name}</span><span class="text-orange-500 font-black text-xs">₹${item.price}</span></div>
+                    <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
+                </div>`).join('');
+            document.getElementById('cartCount').innerText = cart.length;
+            updateTotals();
+        };
 
-    window.registerUser = async () => {
-        const name = document.getElementById('uName').value;
-        const phone = document.getElementById('uPhone').value;
-        const pass = document.getElementById('uPass').value;
-        if(!name || !phone || !pass) return alert("All fields are required!");
-        user = { name, phone };
-        try {
-            await addDoc(collection(db, "users"), { ...user, pass });
-            localStorage.setItem('campusUser', JSON.stringify(user));
-            location.reload();
-        } catch (e) { alert("Error registering user: " + e.message); }
-    };
+        window.removeFromCart = (i) => { cart.splice(i, 1); renderCart(); };
 
-    window.placeOrder = async () => {
-        if(!user) return openModal('user');
-        if(cart.length === 0) return alert("Your tray is empty!");
-        const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
-        try {
+        window.updateTotals = () => {
+            const foodTotal = cart.reduce((s, i) => s + i.price, 0);
+            const total = foodTotal + (cart.length * parcelPrice);
+            document.getElementById('totalDisplay').innerText = `₹${total}`;
+        };
+
+        window.placeOrder = async () => {
+            if(!user) return openModal('user');
+            if(cart.length === 0) return alert("Your tray is empty!");
+            const finalBill = cart.reduce((s, i) => s + i.price, 0) + (cart.length * parcelPrice);
             await addDoc(collection(db, "orders"), {
-                userName: user.name,
-                phone: user.phone,
-                foodItems: cart.map(i => i.name),
-                bill: finalBill,
-                status: "pending",
-                createdAt: new Date()
+                userName: user.name, phone: user.phone, foodItems: cart.map(i => i.name),
+                bill: finalBill, status: "pending", createdAt: new Date()
             });
             alert("Order placed successfully! 🍕✨");
             cart = []; renderCart(); toggleCart();
-        } catch (e) { alert("Order failed: " + e.message); }
-    };
+        };
 
-    window.verifyAdmin = () => {
-        const id = document.getElementById('aID').value;
-        const pass = document.getElementById('aPass').value;
-        // Tip: For production, use Firebase Auth instead of hardcoded creds!
-        if(id === "havi" && pass === "1234567890") {
-            document.getElementById('adminDash').classList.remove('hidden');
-            closeModal();
-        } else alert("Invalid Admin ID or Password");
-    };
+        window.registerUser = async () => {
+            const name = document.getElementById('uName').value;
+            const phone = document.getElementById('uPhone').value;
+            const pass = document.getElementById('uPass').value;
+            if(!name || !phone || !pass) return alert("All fields are required!");
+            user = { name, phone };
+            await addDoc(collection(db, "users"), { ...user, pass });
+            localStorage.setItem('campusUser', JSON.stringify(user));
+            location.reload();
+        };
 
-    window.dbAddMenuItem = async () => {
-        const name = document.getElementById('mName').value;
-        const price = Number(document.getElementById('mPrice').value);
-        const image = document.getElementById('mImg').value;
-        if(!name || !price) return alert("Item details missing!");
-        await addDoc(collection(db, "menu"), { name, price, image });
-        alert("New item added to menu!");
-        document.getElementById('mName').value = ''; 
-        document.getElementById('mPrice').value = ''; 
-        document.getElementById('mImg').value = '';
-    };
+         
+        window.toggleAdminView = (view) => {
+            document.getElementById('adminOrdersView').classList.toggle('hidden', view !== 'orders');
+            document.getElementById('adminMenuView').classList.toggle('hidden', view !== 'menu');
+        };
 
-    window.dbSetParcel = async () => {
-        const p = Number(document.getElementById('pInput').value);
-        await setDoc(doc(db, "settings", "global"), { parcel: p });
-        alert("Global settings updated!");
-    };
+        window.deleteMenuItem = async (id) => {
+            if(confirm("Remove this item?")) await deleteDoc(doc(db, "menu", id));
+        };
 
-    window.confirmOrder = async (id, phone, bill) => {
-        try {
+        window.dbAddMenuItem = async () => {
+            const name = document.getElementById('mName').value;
+            const price = Number(document.getElementById('mPrice').value);
+            const image = document.getElementById('mImg').value;
+            if(!name || !price) return alert("Need name and price!");
+            await addDoc(collection(db, "menu"), { name, price, image });
+            document.getElementById('mName').value = ''; document.getElementById('mPrice').value = '';
+        };
+
+        window.dbSetParcel = async () => {
+            const p = Number(document.getElementById('pInput').value);
+            await setDoc(doc(db, "settings", "global"), { parcel: p });
+            alert("Updated!");
+        };
+
+        window.verifyAdmin = () => {
+            const id = document.getElementById('aID').value;
+            const pass = document.getElementById('aPass').value;
+            if(id === "havi" && pass === "1234567890") {
+                document.getElementById('adminDash').classList.remove('hidden');
+                closeModal();
+            } else alert("Access Denied");
+        };
+
+        window.confirmOrder = async (id, phone, bill) => {
             await updateDoc(doc(db, "orders", id), { status: "accepted" });
-            alert(`ORDER CONFIRMED: Bill of ₹${bill} for ${phone}`);
-        } catch (e) { alert("Error: " + e.message); }
-    };
-</script>
+            alert(`Accepted bill of ₹${bill}`);
+        };
+
+        window.openModal = (type) => {
+            document.getElementById('masterModal').classList.add('modal-active');
+            document.getElementById('userFields').classList.toggle('hidden', type !== 'user');
+            document.getElementById('adminFields').classList.toggle('hidden', type !== 'admin');
+        };
+        window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
+        window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+    </script>
 </body>
 </html>
