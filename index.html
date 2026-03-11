@@ -80,25 +80,29 @@
                 </div>
             </div>
 
-            <div id="adminMenuView" class="hidden grid lg:grid-cols-3 gap-12">
-                <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit sticky top-8">
-                    <h4 class="font-black mb-6 uppercase text-xs text-slate-500">Add New Dish</h4>
-                    <input type="text" id="mName" placeholder="Dish Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none focus:border-orange-500">
-                    <input type="number" id="mPrice" placeholder="Price (₹)" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none focus:border-orange-500">
-                    
-                    <select id="mCategory" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none focus:border-orange-500">
-                        <option value="Biryanis">Biryanis 🍛</option>
-                        <option value="Noodles">Noodles 🍜</option>
-                        <option value="Fried Rice">Fried Rice 🍚</option>
-                        <option value="Starters">Starters 🍗</option>
-                        <option value="Beverages">Beverages 🥤</option>
-                    </select>
+           <div class="lg:col-span-1 bg-[#0f172a] p-8 rounded-[2rem] border border-slate-800 h-fit sticky top-8">
+    <h4 class="font-black mb-6 uppercase text-xs text-slate-500">Add New Dish</h4>
+    <input type="text" id="mName" placeholder="Dish Name" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none">
+    
+    <div class="flex gap-2 mb-3">
+        <input type="number" id="mPrice" placeholder="Reg. Price" class="w-full bg-slate-900 border border-slate-800 p-4 rounded-xl text-white outline-none">
+        <input type="number" id="mSpecialPrice" placeholder="Special (Optional)" class="w-full bg-slate-900 border border-orange-500/30 p-4 rounded-xl text-white outline-none">
+    </div>
+    
+    <select id="mCategory" class="w-full bg-slate-900 border border-slate-800 p-4 mb-3 rounded-xl text-white outline-none">
+        <option value="Biryanis">Biryanis 🍛</option>
+        <option value="Noodles">Noodles 🍜</option>
+        <option value="Fried Rice">Fried Rice 🍚</option>
+        <option value="Starters">Starters 🍗</option>
+    </select>
+    
+    <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white outline-none">
+    <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase">Add to Menu</button>
+</div>
 
-                    <input type="text" id="mImg" placeholder="Image URL" class="w-full bg-slate-900 border border-slate-800 p-4 mb-6 rounded-xl text-white outline-none focus:border-orange-500">
-                    <button onclick="dbAddMenuItem()" class="w-full bg-orange-600 text-white py-4 rounded-xl font-black uppercase tracking-widest">Add to Menu</button>
-                </div>
+                     
                 
-                <div class="lg:col-span-2">
+             <div class="lg:col-span-2">
                     <div class="mb-8 relative">
                         <input type="text" id="adminSearch" oninput="searchMenu()" placeholder="Search menu items..." class="w-full bg-slate-900 border border-slate-800 p-4 pl-12 rounded-2xl text-white outline-none focus:border-orange-500">
                         <i class="fas fa-search absolute left-5 top-1/2 -translate-y-1/2 text-slate-500"></i>
@@ -210,13 +214,56 @@
                 </div>`;
         }
 
-        window.dbAddMenuItem = async () => {
-            const n = document.getElementById('mName'), p = document.getElementById('mPrice'), c = document.getElementById('mCategory'), i = document.getElementById('mImg');
-            if(!n.value || !p.value) return alert("Missing info");
-            await addDoc(collection(db, "menu"), { name: n.value, price: Number(p.value), category: c.value, image: i.value });
-            n.value = ''; p.value = ''; i.value = '';
-            alert("Added!");
-        };
+        
+window.dbAddMenuItem = async () => {
+    const n = document.getElementById('mName'), 
+          p = document.getElementById('mPrice'), 
+          sp = document.getElementById('mSpecialPrice'),  
+          c = document.getElementById('mCategory'), 
+          i = document.getElementById('mImg');
+
+    if(!n.value || !p.value) return alert("Missing name or regular price!");
+
+    await addDoc(collection(db, "menu"), { 
+        name: n.value, 
+        price: Number(p.value), 
+        specialPrice: sp.value ? Number(sp.value) : null, 
+        category: c.value, 
+        image: i.value 
+    });
+
+    n.value = ''; p.value = ''; sp.value = ''; i.value = '';
+    alert("Added successfully!");
+};
+
+ 
+onSnapshot(collection(db, "menu"), (snap) => {
+    const grid = document.getElementById('menuGrid');
+    grid.innerHTML = '';
+    snap.forEach(d => {
+        const item = d.data();
+        const finalPrice = item.specialPrice || item.price; 
+        const hasDiscount = item.specialPrice && item.specialPrice < item.price;
+
+        grid.innerHTML += `
+            <div class="menu-card glass-card rounded-[2.5rem] group relative">
+                ${hasDiscount ? `<span class="absolute top-4 left-4 z-20 bg-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse uppercase">Offer</span>` : ''}
+                <div class="hover-overlay"><span class="quick-tag">Quick Add +</span></div>
+                <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover"></div>
+                <div class="p-8">
+                    <span class="text-[10px] text-orange-500 font-bold uppercase">${item.category}</span>
+                    <h3 class="font-bold text-white text-xl mb-4">${item.name}</h3>
+                    <div class="flex justify-between items-center">
+                        <div>
+                            ${hasDiscount ? `<span class="text-xs text-slate-500 line-through mr-2">₹${item.price}</span>` : ''}
+                            <span class="text-2xl font-black text-white">₹${finalPrice}</span>
+                        </div>
+                        <button onclick="addToCart('${item.name}', ${finalPrice})" class="bg-orange-600 text-white h-10 w-10 rounded-xl flex items-center justify-center"><i class="fas fa-plus"></i></button>
+                    </div>
+                </div>
+            </div>`;
+    });
+});
  
         window.signOutUser = () => { localStorage.removeItem('campusUser'); location.reload(); };
         window.addEventListener('keydown', (e) => { if (e.key === "Escape") closeModal(); });
