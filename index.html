@@ -12,7 +12,12 @@
         .modal-active { display: flex !important; }
         .glass-nav { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.08); }
         .glass-card { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.05); }
-        .gradient-text { background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .gradient-text { 
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc); 
+    -webkit-background-clip: text;  
+    background-clip: text;          
+    -webkit-text-fill-color: transparent; 
+}
         .btn-glow:hover { box-shadow: 0 0 20px rgba(249, 115, 22, 0.4); transform: translateY(-2px); }
         .menu-card { position: relative; overflow: hidden; transition: all 0.5s ease; }
         .menu-card:hover { transform: translateY(-10px); }
@@ -372,7 +377,7 @@
         window.toggleAdminView = (v) => { document.getElementById('adminOrdersView').classList.toggle('hidden', v !== 'orders'); document.getElementById('adminMenuView').classList.toggle('hidden', v !== 'menu'); };
         window.addEventListener('keydown', (e) => { if (e.key === "Escape") { closeModal(); if(!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart(); } });
  
-        
+       // ORDER LISTENER (Admin Side)
 onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
     const list = document.getElementById('orderList');
     if(!list) return;
@@ -380,7 +385,7 @@ onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap)
     snap.forEach(d => {
         const o = d.data();
         if(o.status === "pending") {
-     
+            // Join items into a string for the WhatsApp message
             const itemsString = o.foodItems.join(', ');
             
             list.innerHTML += `
@@ -399,9 +404,7 @@ onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap)
         }
     });
 });
-                }
-            });
-        });
+            
     </script>
 </body>
 </html>
