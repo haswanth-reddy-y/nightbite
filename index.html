@@ -209,6 +209,81 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+         
+
+// 1. Enter Key for Login/Registration
+const studentInputs = [document.getElementById('uName'), document.getElementById('uPhone'), document.getElementById('uPass')];
+studentInputs.forEach(input => {
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') registerUser();
+    });
+});
+
+const adminInputs = [document.getElementById('aID'), document.getElementById('aPass')];
+adminInputs.forEach(input => {
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') verifyAdmin();
+    });
+});
+
+// 2. Arrow Key Navigation & Escape
+let selectedIndex = -1;
+
+window.addEventListener('keydown', (e) => {
+    const cards = document.querySelectorAll('.menu-card');
+    const isModalOpen = !document.getElementById('masterModal').classList.contains('hidden');
+    const isAdminDashOpen = !document.getElementById('adminDash').classList.contains('hidden');
+
+    // ESCAPE to close panels
+    if (e.key === "Escape") {
+        closeModal();
+        if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
+    }
+
+    // ARROW NAVIGATION (Only if no modals/dashboards are blocking the view)
+    if (!isModalOpen && !isAdminDashOpen && document.activeElement.tagName !== 'INPUT') {
+        if (e.key === "ArrowDown" || e.key === "ArrowRight") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex + 1) % cards.length;
+            highlightCard(cards);
+        } 
+        else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
+            e.preventDefault();
+            selectedIndex = (selectedIndex - 1 + cards.length) % cards.length;
+            highlightCard(cards);
+        }
+        // ENTER to Add Selected Item to Tray
+        else if (e.key === "Enter" && selectedIndex !== -1) {
+            e.preventDefault();
+            const btn = cards[selectedIndex].querySelector('button');
+            btn.click();
+            // Quick visual flash to show it was added
+            cards[selectedIndex].classList.add('ring-4', 'ring-orange-500/50');
+            setTimeout(() => cards[selectedIndex].classList.remove('ring-4', 'ring-orange-500/50'), 300);
+        }
+    }
+});
+
+function highlightCard(cards) {
+    cards.forEach((c, i) => {
+        if (i === selectedIndex) {
+            c.classList.add('border-orange-500', 'scale-105', 'z-30');
+            c.classList.remove('border-slate-800'); // Remove default border
+            c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            c.classList.remove('border-orange-500', 'scale-105', 'z-30');
+            c.classList.add('border-slate-800');
+        }
+    });
+}
+
+// 3. Quick Search Shortcut (Press '/' to search)
+window.addEventListener('keydown', (e) => {
+    if (e.key === "/" && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        document.getElementById('userSearch').focus();
+    }
+});
 
         let fullMenu = [];
         let currentCategory = 'All';
