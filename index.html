@@ -194,360 +194,238 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
-            authDomain: "nighthunger-e55e1.firebaseapp.com",
-            projectId: "nighthunger-e55e1",
-            storageBucket: "nighthunger-e55e1.firebasestorage.app",
-            messagingSenderId: "129732701448",
-            appId: "1:129732701448:web:eb136b05c3e20414c590bd"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyC1TaWwgXTAoPmxwlSvcVqiFIr05KfLSAk",
+        authDomain: "nighthunger-e55e1.firebaseapp.com",
+        projectId: "nighthunger-e55e1",
+        storageBucket: "nighthunger-e55e1.firebasestorage.app",
+        messagingSenderId: "129732701448",
+        appId: "1:129732701448:web:eb136b05c3e20414c590bd"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-         
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
  
+    let fullMenu = [];
+    let currentCategory = 'All';
+    let cart = [];
+    let globalParcelPrice = 0;
+    let user = JSON.parse(localStorage.getItem('campusUser')) || null;
  
-const studentInputs = [document.getElementById('uName'), document.getElementById('uPhone'), document.getElementById('uPass')];
-studentInputs.forEach(input => {
-    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') registerUser(); });
-});
-
-const adminInputs = [document.getElementById('aID'), document.getElementById('aPass')];
-adminInputs.forEach(input => {
-    input.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyAdmin(); });
-});
+    const checkUser = () => {
+        if(user) {
+            const statusBtn = document.getElementById('userStatus');
+            const signOutBtn = document.getElementById('signOutBtn');
+            if(statusBtn) statusBtn.innerText = `Hi, ${user.name.split(' ')[0]}`;
+            if(signOutBtn) signOutBtn.classList.remove('hidden');
+        }
+    };
+    checkUser();
  
-const menuInputs = [document.getElementById('mName'), document.getElementById('mPrice'), document.getElementById('mSpecialPrice'), document.getElementById('mImg'), document.getElementById('mCategory')];
-menuInputs.forEach(input => {
-    input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            dbAddMenuItem();
+    onSnapshot(doc(db, "settings", "global"), (snap) => {
+        if(snap.exists()) {
+            globalParcelPrice = snap.data().parcel || 0;
+            document.getElementById('parcelDisplay').innerText = `₹${globalParcelPrice}`;
+            window.updateTotals();
         }
     });
-});
  
-document.getElementById('pInput').addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        dbSetParcel();
-    }
-}); 
-let selectedIndex = -1;
-window.addEventListener('keydown', (e) => {
-    const cards = document.querySelectorAll('.menu-card');
-    const isModalOpen = !document.getElementById('masterModal').classList.contains('hidden');
-    const isAdminDashOpen = !document.getElementById('adminDash').classList.contains('hidden');
-
-    if (e.key === "Escape") {
-        closeModal();
-        if (!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart();
-    }
- 
-    if (!isModalOpen && !isAdminDashOpen && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'SELECT') {
-        if (e.key === "ArrowDown" || e.key === "ArrowRight") {
-            e.preventDefault();
-            selectedIndex = (selectedIndex + 1) % cards.length;
-            highlightCard(cards);
-        } 
-        else if (e.key === "ArrowUp" || e.key === "ArrowLeft") {
-            e.preventDefault();
-            selectedIndex = (selectedIndex - 1 + cards.length) % cards.length;
-            highlightCard(cards);
-        }
-        else if (e.key === "Enter" && selectedIndex !== -1) {
-            e.preventDefault();
-            const btn = cards[selectedIndex].querySelector('button');
-            btn.click();
-            cards[selectedIndex].classList.add('ring-4', 'ring-orange-500/50');
-            setTimeout(() => cards[selectedIndex].classList.remove('ring-4', 'ring-orange-500/50'), 300);
-        }
-    }
-});
-
-function highlightCard(cards) {
-    cards.forEach((c, i) => {
-        if (i === selectedIndex) {
-            c.classList.add('border-orange-500', 'scale-105', 'z-30');
-            c.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            c.classList.remove('border-orange-500', 'scale-105', 'z-30');
-        }
+    onSnapshot(collection(db, "menu"), (snap) => {
+        fullMenu = [];
+        snap.forEach(d => fullMenu.push({ id: d.id, ...d.data() }));
+        window.renderUserMenu();
+        window.renderAdminList();
     });
-}
  
-window.addEventListener('keydown', (e) => {
-    if (e.key === "/" && document.activeElement.tagName !== 'INPUT') {
-        e.preventDefault();
-        
-        const adminDash = document.getElementById('adminDash');
-        if (adminDash.classList.contains('hidden')) {
-            document.getElementById('userSearch').focus();
-        } else {
-            document.getElementById('adminSearch').focus();
-        }
-    }
-});
-
-function highlightCard(cards) {
-    cards.forEach((c, i) => {
-        if (i === selectedIndex) {
-            c.classList.add('border-orange-500', 'scale-105', 'z-30');
-            c.classList.remove('border-slate-800'); // Remove default border
-            c.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
-            c.classList.remove('border-orange-500', 'scale-105', 'z-30');
-            c.classList.add('border-slate-800');
-        }
-    });
-}
- 
-window.addEventListener('keydown', (e) => {
-    if (e.key === "/" && document.activeElement.tagName !== 'INPUT') {
-        e.preventDefault();
-        document.getElementById('userSearch').focus();
-    }
-});
-
-        let fullMenu = [];
-        let currentCategory = 'All';
-        let cart = [];
-        let globalParcelPrice = 0;
-        let user = JSON.parse(localStorage.getItem('campusUser')) || null;
- 
-        const checkUser = () => {
-            if(user) {
-                document.getElementById('userStatus').innerText = `Hi, ${user.name.split(' ')[0]}`;
-                document.getElementById('signOutBtn').classList.remove('hidden');
-            }
-        };
-        checkUser();
- 
-        onSnapshot(doc(db, "settings", "global"), (snap) => {
-            if(snap.exists()) {
-                globalParcelPrice = snap.data().parcel || 0;
-                document.getElementById('parcelDisplay').innerText = `₹${globalParcelPrice}`;
-                updateTotals();
+    onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
+        const list = document.getElementById('orderList');
+        if(!list) return;
+        list.innerHTML = '';
+        snap.forEach(d => {
+            const o = d.data();
+            if(o.status === "pending") {
+                const itemsString = o.foodItems.join(', ');
+                list.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center mb-4">
+                        <div>
+                            <h4 class="font-black text-white text-xl uppercase">${o.userName}</h4>
+                            <p class="text-slate-500 font-bold text-xs uppercase">${o.phone}</p>
+                            <p class="text-slate-300 text-sm mt-3 font-semibold">${itemsString}</p>
+                            <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
+                        </div>
+                        <button onclick="window.confirmOrder('${d.id}', '${o.phone}', ${o.bill}, '${o.userName}', '${itemsString}')" 
+                                class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl">
+                            ACCEPT & BILL
+                        </button>
+                    </div>`;
             }
         });
- 
-        onSnapshot(collection(db, "menu"), (snap) => {
-            fullMenu = [];
-            snap.forEach(d => fullMenu.push({ id: d.id, ...d.data() }));
-            renderUserMenu();
-            renderAdminList();
-        });
- 
-        window.renderUserMenu = () => {
-            const grid = document.getElementById('menuGrid');
-            const term = document.getElementById('userSearch').value.toLowerCase();
-            grid.innerHTML = '';
-
-            const filtered = fullMenu.filter(item => {
-                const matchCategory = currentCategory === 'All' || item.category === currentCategory;
-                const matchSearch = item.name.toLowerCase().includes(term);
-                return matchCategory && matchSearch;
-            });
-
-            filtered.forEach(item => {
-                const finalPrice = item.specialPrice || item.price;
-                const hasOffer = item.specialPrice && item.specialPrice < item.price;
-
-                grid.innerHTML += `
-                    <div class="menu-card glass-card rounded-[2.5rem] group relative">
-                        ${hasOffer ? `<span class="absolute top-4 left-4 z-20 bg-orange-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse">OFFER</span>` : ''}
-                        <div class="hover-overlay"><span class="quick-tag">Quick Add +</span></div>
-                        <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover transition group-hover:scale-110"></div>
-                        <div class="p-8">
-                            <span class="text-[10px] text-orange-500 font-black uppercase tracking-widest">${item.category}</span>
-                            <h3 class="font-bold text-white text-xl mb-4">${item.name}</h3>
-                            <div class="flex justify-between items-center">
-                                <div>
-                                    ${hasOffer ? `<span class="text-xs text-slate-500 line-through mr-1">₹${item.price}</span>` : ''}
-                                    <span class="text-2xl font-black text-white">₹${finalPrice}</span>
-                                </div>
-                                <button onclick="addToCart('${item.name}', ${finalPrice})" class="relative z-20 bg-orange-600 text-white h-10 w-10 rounded-xl flex items-center justify-center btn-glow transition-all">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>`;
-            });
-        };
- 
-        window.filterUserMenu = () => renderUserMenu();
-        window.setCategory = (cat) => {
-            currentCategory = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText === cat);
-            });
-            renderUserMenu();
-        };
- 
-        function renderAdminList() {
-            const adminList = document.getElementById('adminMenuList');
-            if(!adminList) return;
-            const term = document.getElementById('adminSearch').value.toLowerCase();
-            adminList.innerHTML = '';
-            fullMenu.filter(i => i.name.toLowerCase().includes(term)).forEach(item => {
-                adminList.innerHTML += `
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
-                        <div class="flex items-center gap-4">
-                            <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
-                            <div><p class="text-white font-bold text-sm">${item.name}</p><p class="text-slate-500 text-[10px] uppercase">${item.category}</p></div>
-                        </div>
-                        <button onclick="deleteMenuItem('${item.id}')" class="text-red-500 hover:bg-red-500/10 p-3 rounded-xl"><i class="fas fa-trash"></i></button>
-                    </div>`;
-            });
-        }
-        window.searchMenu = () => renderAdminList();
- 
-        window.dbSetParcel = async () => {
-            const p = Number(document.getElementById('pInput').value);
-            await setDoc(doc(db, "settings", "global"), { parcel: p });
-            alert("Global Parcel Charge Updated!");
-        };
-
-        window.dbAddMenuItem = async () => {
-            const n = document.getElementById('mName'), p = document.getElementById('mPrice'), sp = document.getElementById('mSpecialPrice'), c = document.getElementById('mCategory'), i = document.getElementById('mImg');
-            if(!n.value || !p.value) return alert("Fill Name and Reg. Price");
-            await addDoc(collection(db, "menu"), { name: n.value, price: Number(p.value), specialPrice: sp.value ? Number(sp.value) : null, category: c.value, image: i.value });
-            n.value = ''; p.value = ''; sp.value = ''; i.value = '';
-            alert("Added!");
-        };
-
-        window.addToCart = (n, p) => { 
-    cart.push({n, p}); 
-    updateTotals(); 
-  
-    if (window.innerWidth > 768) {
-        if (document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
-            toggleCart();
-        }
-    } else {
-        console.log("Added to tray");
-    }
-};
-        window.updateTotals = () => {
-            const foodTotal = cart.reduce((s,i)=>s+i.p,0);
-            const total = foodTotal + (cart.length * globalParcelPrice);
-            document.getElementById('totalDisplay').innerText = `₹${total}`;
-            document.getElementById('cartCount').innerText = cart.length;
-            renderCartItems();
-        };
-
-        window.renderCartItems = () => {
-            const list = document.getElementById('cartList');
-            list.innerHTML = cart.map((item, i) => `
-                <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
-                    <div><span class="block text-white font-bold text-sm">${item.n}</span><span class="text-orange-500 font-black text-xs">₹${item.p}</span></div>
-                    <button onclick="removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
-                </div>`).join('');
-        };
-
-        window.removeFromCart = (i) => { cart.splice(i, 1); updateTotals(); };
-
-       window.placeOrder = async () => {
-    if(!user) return openModal('user');
-    if(cart.length === 0) return alert("Tray is empty!");
-    
-    const finalBill = cart.reduce((s,i)=>s+i.p,0) + (cart.length * globalParcelPrice);
-    
-    await addDoc(collection(db, "orders"), { 
-        userName: user.name, 
-        phone: user.phone, 
-        foodItems: cart.map(i => i.n), 
-        bill: finalBill, 
-        status: "pending", 
-        createdAt: new Date() 
     });
-    if (Notification.permission === "granted") {
-        new Notification("Order Blasted! 🚀", {
-            body: "The kitchen has received your order. Check back in 15 mins.",
-            icon: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" // Burger icon
-        });
-    }
+ 
+    
+    window.openModal = (t) => {
+        document.getElementById('masterModal').classList.add('modal-active');
+        document.getElementById('userFields').classList.toggle('hidden', t !== 'user');
+        document.getElementById('adminFields').classList.toggle('hidden', t !== 'admin');
+    };
 
-    alert("Order Blasted! 🚀");
-    cart = []; updateTotals(); toggleCart();
-};
+    window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
 
-        window.registerUser = async () => {
-            const n = document.getElementById('uName'), ph = document.getElementById('uPhone'), ps = document.getElementById('uPass');
-            if(!n.value || !ph.value) return alert("Need name and phone!");
+    window.registerUser = async () => {
+        const n = document.getElementById('uName'), ph = document.getElementById('uPhone'), ps = document.getElementById('uPass');
+        if(!n.value || !ph.value) return alert("Need name and phone!");
+        try {
             const userData = { name: n.value, phone: ph.value };
             await addDoc(collection(db, "users"), { ...userData, pass: ps.value });
             localStorage.setItem('campusUser', JSON.stringify(userData));
             location.reload();
-        };
-
-        window.verifyAdmin = () => {
-            if(document.getElementById('aID').value==="havi" && document.getElementById('aPass').value==="1234567890") {
-                document.getElementById('adminDash').classList.remove('hidden'); closeModal();
-            } else alert("Invalid ID");
-        };
-
-        window.confirmOrder = async (id, phone, bill, userName, items) => {
-    try {  
-        await updateDoc(doc(db, "orders", id), { status: "accepted" });
- 
-        const message = `*THE NIGHT BITE - BILL CONFIRMED* 🍟%0A%0A` +
-                        `*Customer:* ${userName}%0A` +
-                        `*Order:* ${items}%0A` +
-                        `*Total Bill:* ₹${bill}%0A%0A` +
-                        `_Your order is being prepared. Please collect it in 15-20 mins!_`;
- 
-        const waLink = `https://wa.me/91${phone}?text=${message}`;
-
-              alert(`Order Accepted! Sending bill to ${userName}...`);
-        window.open(waLink, '_blank'); 
-
-    } catch (e) {
-        console.error("Error confirming order:", e);
-        alert("Failed to accept order.");
-    }
-};
-        window.deleteMenuItem = async (id) => { if(confirm("Delete item?")) await deleteDoc(doc(db, "menu", id)); };
-        window.signOutUser = () => { localStorage.removeItem('campusUser'); location.reload(); };
-        window.openModal = (t) => { document.getElementById('masterModal').classList.add('modal-active'); document.getElementById('userFields').classList.toggle('hidden', t!=='user'); document.getElementById('adminFields').classList.toggle('hidden', t!=='admin'); };
-        window.closeModal = () => document.getElementById('masterModal').classList.remove('modal-active');
-        window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
-        window.toggleAdminView = (v) => { document.getElementById('adminOrdersView').classList.toggle('hidden', v !== 'orders'); document.getElementById('adminMenuView').classList.toggle('hidden', v !== 'menu'); };
-        window.addEventListener('keydown', (e) => { if (e.key === "Escape") { closeModal(); if(!document.getElementById('cartSidebar').classList.contains('translate-x-full')) toggleCart(); } });
- 
-      
-onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc")), (snap) => {
-    const list = document.getElementById('orderList');
-    if(!list) return;
-    list.innerHTML = '';
-    snap.forEach(d => {
-        const o = d.data();
-        if(o.status === "pending") {
-         
-            const itemsString = o.foodItems.join(', ');
-            
-            list.innerHTML += `
-                <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl border-l-8 border-orange-600 flex justify-between items-center mb-4">
-                    <div>
-                        <h4 class="font-black text-white text-xl uppercase">${o.userName}</h4>
-                        <p class="text-slate-500 font-bold text-xs uppercase">${o.phone}</p>
-                        <p class="text-slate-300 text-sm mt-3 font-semibold">${itemsString}</p>
-                        <div class="mt-4 inline-block bg-orange-600/10 text-orange-500 px-4 py-1.5 rounded-xl font-black text-sm border border-orange-500/20">₹${o.bill} DUE</div>
-                    </div>
-                    <button onclick="confirmOrder('${d.id}', '${o.phone}', ${o.bill}, '${o.userName}', '${itemsString}')" 
-                            class="bg-green-600 hover:bg-green-500 text-white px-8 py-4 rounded-2xl font-black transition shadow-xl">
-                        ACCEPT & BILL
-                    </button>
-                </div>`;
+        } catch (e) {
+            console.error(e);
+            alert("Error: Check your Firebase Database Rules.");
         }
-    });
-});
-          
-    </script>
-</body>
-</html>
+    };
+
+    window.verifyAdmin = () => {
+        const id = document.getElementById('aID').value;
+        const pass = document.getElementById('aPass').value;
+        if(id === "havi" && pass === "1234567890") {
+            document.getElementById('adminDash').classList.remove('hidden');
+            window.closeModal();
+        } else {
+            alert("Invalid Credentials");
+        }
+    };
+
+    window.renderUserMenu = () => {
+        const grid = document.getElementById('menuGrid');
+        if(!grid) return;
+        const term = document.getElementById('userSearch').value.toLowerCase();
+        grid.innerHTML = '';
+
+        fullMenu.filter(item => {
+            const matchCategory = currentCategory === 'All' || item.category === currentCategory;
+            const matchSearch = item.name.toLowerCase().includes(term);
+            return matchCategory && matchSearch;
+        }).forEach(item => {
+            const finalPrice = item.specialPrice || item.price;
+            const hasOffer = item.specialPrice && item.specialPrice < item.price;
+            grid.innerHTML += `
+                <div class="menu-card glass-card rounded-[2.5rem] group relative">
+                    ${hasOffer ? `<span class="absolute top-4 left-4 z-20 bg-orange-600 text-white text-[10px] font-black px-3 py-1 rounded-full animate-pulse">OFFER</span>` : ''}
+                    <div class="hover-overlay"><span class="quick-tag">Quick Add +</span></div>
+                    <div class="h-48 overflow-hidden"><img src="${item.image}" class="h-full w-full object-cover transition group-hover:scale-110"></div>
+                    <div class="p-8">
+                        <span class="text-[10px] text-orange-500 font-black uppercase tracking-widest">${item.category}</span>
+                        <h3 class="font-bold text-white text-xl mb-4">${item.name}</h3>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                ${hasOffer ? `<span class="text-xs text-slate-500 line-through mr-1">₹${item.price}</span>` : ''}
+                                <span class="text-2xl font-black text-white">₹${finalPrice}</span>
+                            </div>
+                            <button onclick="window.addToCart('${item.name}', ${finalPrice})" class="relative z-20 bg-orange-600 text-white h-10 w-10 rounded-xl flex items-center justify-center btn-glow transition-all">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    };
+
+    window.addToCart = (n, p) => {
+        cart.push({n, p});
+        window.updateTotals();
+        if (window.innerWidth > 768 && document.getElementById('cartSidebar').classList.contains('translate-x-full')) {
+            window.toggleCart();
+        }
+    };
+
+    window.updateTotals = () => {
+        const foodTotal = cart.reduce((s,i) => s + i.p, 0);
+        const total = foodTotal + (cart.length * globalParcelPrice);
+        document.getElementById('totalDisplay').innerText = `₹${total}`;
+        document.getElementById('cartCount').innerText = cart.length;
+        window.renderCartItems();
+    };
+
+    window.renderCartItems = () => {
+        const list = document.getElementById('cartList');
+        list.innerHTML = cart.map((item, i) => `
+            <div class="flex justify-between items-center bg-slate-900/80 p-5 rounded-2xl border border-slate-800">
+                <div><span class="block text-white font-bold text-sm">${item.n}</span><span class="text-orange-500 font-black text-xs">₹${item.p}</span></div>
+                <button onclick="window.removeFromCart(${i})" class="text-slate-600 hover:text-red-500 transition text-2xl">&times;</button>
+            </div>`).join('');
+    };
+
+    window.removeFromCart = (i) => { cart.splice(i, 1); window.updateTotals(); };
+
+    window.placeOrder = async () => {
+        if(!user) return window.openModal('user');
+        if(cart.length === 0) return alert("Tray is empty!");
+        const finalBill = cart.reduce((s,i)=>s+i.p,0) + (cart.length * globalParcelPrice);
+        await addDoc(collection(db, "orders"), { 
+            userName: user.name, 
+            phone: user.phone, 
+            foodItems: cart.map(i => i.n), 
+            bill: finalBill, 
+            status: "pending", 
+            createdAt: new Date() 
+        });
+        alert("Order Blasted! 🚀");
+        cart = []; window.updateTotals(); window.toggleCart();
+    };
+
+    window.confirmOrder = async (id, phone, bill, userName, items) => {
+        await updateDoc(doc(db, "orders", id), { status: "accepted" });
+        const message = `*THE NIGHT BITE - BILL CONFIRMED* 🍟%0A%0A*Customer:* ${userName}%0A*Order:* ${items}%0A*Total Bill:* ₹${bill}%0A%0A_Please collect in 15-20 mins!_`;
+        window.open(`https://wa.me/91${phone}?text=${message}`, '_blank');
+    };
+
+    window.renderAdminList = () => {
+        const adminList = document.getElementById('adminMenuList');
+        if(!adminList) return;
+        const term = document.getElementById('adminSearch').value.toLowerCase();
+        adminList.innerHTML = '';
+        fullMenu.filter(i => i.name.toLowerCase().includes(term)).forEach(item => {
+            adminList.innerHTML += `
+                <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <img src="${item.image}" class="w-12 h-12 rounded-lg object-cover">
+                        <div><p class="text-white font-bold text-sm">${item.name}</p><p class="text-slate-500 text-[10px] uppercase">${item.category}</p></div>
+                    </div>
+                    <button onclick="window.deleteMenuItem('${item.id}')" class="text-red-500 hover:bg-red-500/10 p-3 rounded-xl"><i class="fas fa-trash"></i></button>
+                </div>`;
+        });
+    };
+
+    window.dbAddMenuItem = async () => {
+        const n = document.getElementById('mName'), p = document.getElementById('mPrice'), sp = document.getElementById('mSpecialPrice'), c = document.getElementById('mCategory'), i = document.getElementById('mImg');
+        if(!n.value || !p.value) return alert("Fill Name and Reg. Price");
+        await addDoc(collection(db, "menu"), { name: n.value, price: Number(p.value), specialPrice: sp.value ? Number(sp.value) : null, category: c.value, image: i.value });
+        n.value = ''; p.value = ''; sp.value = ''; i.value = '';
+        alert("Added!");
+    };
+
+    window.dbSetParcel = async () => {
+        const p = Number(document.getElementById('pInput').value);
+        await setDoc(doc(db, "settings", "global"), { parcel: p });
+        alert("Global Parcel Charge Updated!");
+    };
+
+    window.deleteMenuItem = async (id) => { if(confirm("Delete item?")) await deleteDoc(doc(db, "menu", id)); };
+    window.signOutUser = () => { localStorage.removeItem('campusUser'); location.reload(); };
+    window.toggleCart = () => document.getElementById('cartSidebar').classList.toggle('translate-x-full');
+    window.toggleAdminView = (v) => { 
+        document.getElementById('adminOrdersView').classList.toggle('hidden', v !== 'orders'); 
+        document.getElementById('adminMenuView').classList.toggle('hidden', v !== 'menu'); 
+    };
+    window.setCategory = (cat) => {
+        currentCategory = cat;
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.innerText === cat));
+        window.renderUserMenu();
+    };
+    window.filterUserMenu = () => window.renderUserMenu();
+</script>
